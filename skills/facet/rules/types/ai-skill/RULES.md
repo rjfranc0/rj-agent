@@ -16,10 +16,10 @@ A new skill or capability to be packaged as a reusable agent behavior definition
 ## Preferred Output
 - **Light**: skill concept + trigger description + rough output format
 - **Medium**: skill architecture — name, description, behavior summary, sub-file needs, delegation points
-- **Deep**: full skill design document — behavior spec, file structure, loading model, delegation map, edge cases
+- **Deep**: full skill design document — behavior spec, file structure, loading model, delegation map, edge cases, generated using `skill-creator` skill.
 
 ## Output & Handoff
-Handoff summary should emphasize: trigger contexts, expected output format, workflow steps, sub-file structure if any, and delegation points. Include the full understanding summary and decision log.
+If the `skill-creator` skill is not accessible or does not exists, propose the user to do it yourself like this : handoff summary should emphasize: trigger contexts, expected output format, workflow steps, sub-file structure if any, and delegation points. Include the full understanding summary and decision log.
 
 ## Notes
 Agent skill design is inherently recursive — use facet carefully here to avoid over-engineering. YAGNI ruthlessly.
