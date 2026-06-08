@@ -15,9 +15,10 @@ A new capability added to an existing product or codebase.
 ## Preferred Output
 - **Light**: feature summary (1 paragraph + bullet list of scope)
 - **Medium**: feature description + acceptance criteria + rough implementation notes
-- **Deep**: before producing, ask the user — *"Do you need a spec, an issue, or both?"* — then produce accordingly
+- **Deep**: before producing, ask the user — *"Do you need a spec, an issue, or both?"* — then produce accordingly. In case of an issue, you should use the `brief` skill (if available, do it yourself otherwise).
 
 ## Output & Handoff
 At deep tier, produce the chosen artifact(s) then hand off with a summary emphasizing:
 - For a spec: acceptance criteria, edge cases, scope boundaries, technical constraints
 - For an issue: the user problem, success criteria, explicit non-goals — requirements-focused, not implementation
+Note that the `brief` is a redactor, not a brainstormer. There will be no more discussion, it will turn into issue what you tell it so make sure to give the right context and instructions.
