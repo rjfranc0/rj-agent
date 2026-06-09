@@ -1,6 +1,8 @@
 # Core: Writing
 
-Quality standard and writing rules for all doc output.
+Universal quality standard and protocol. Applies to every domain, every mode.
+
+After loading this file, load `rules/domains/<domain>.md` for the target domain. Domain rules supplement — never override — the universal rules here. If the scope spans multiple domains, load all relevant domain files.
 
 ## The Cognitive Model Standard
 
@@ -11,15 +13,7 @@ A doc file meets the standard when an AI agent reading it can:
 
 Code is never duplicated. The **mental model** of the code is fully captured: behavior, intent, contracts, edge cases, decisions.
 
-## Writing Rules
-
-**Behavior over implementation** — document what a function or module does and why, not how it is written. Never describe syntax.
-
-**Decisions are documented** — why this approach was chosen, what was rejected, what constraint drove it. Undocumented decisions are invisible risks.
-
-**Edge cases are explicit** — not "handles errors gracefully" but "if [condition], returns [result] because [reason]". Vagueness is a gap.
-
-**Contracts are precise** — for any significant function or module: inputs, outputs, invariants, side effects. An agent must know the full contract without opening the file.
+## Universal Writing Rules
 
 **Reference over repeat** — if something is explained elsewhere, link it with context. Never restate content that lives in another file.
 
@@ -28,7 +22,7 @@ Code is never duplicated. The **mental model** of the code is fully captured: be
 **Explicit over implicit** — never assume the reader absorbed context from somewhere else.
 
 **Snippets only when necessary**:
-- Complex implementation pattern that cannot be described clearly in prose
+- Complex pattern that cannot be described clearly in prose
 - Unusual or non-standard methodology choice
 - Subtle invariant that is hard to express without showing it
 

@@ -13,7 +13,7 @@ docs/
 │   └── <domain>/
 │       ├── index.md              ← Domain summary, table of contents
 │       └── <feature>.md
-└── technical/
+└── implementation/
     ├── index.md                  ← Domain map, table of contents
     ├── <domain>.md               ← Single file when domain is simple
     └── <domain>/
@@ -50,9 +50,9 @@ All references are semantic — the surrounding sentence explains *why* the link
 | Direction | Meaning |
 |---|---|
 | `functional → functional` | Domain dependency ("this feature depends on this rule") |
-| `technical → functional` | Implementation traces back to business logic |
+| `implementation → functional` | Implementation traces back to business logic |
 | `functional → technical` | Spec points at concrete implementation |
-| `technical → technical` | Code-level dependency between modules |
+| `technical → implementation` | Code-level dependency between modules |
 
 Reference syntax:
 ```markdown

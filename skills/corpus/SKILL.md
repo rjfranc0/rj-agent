@@ -1,6 +1,6 @@
 ---
 name: corpus
-description: "Write, maintain, and audit technical and functional documentation for a project. Use when bootstrapping docs from scratch, updating docs after code changes, writing targeted documentation, auditing doc quality, or rewriting messy docs. Triggers on: 'document this', 'bootstrap docs', 'update docs', 'audit my docs', 'rewrite docs', 'docs are outdated', 'are my docs good', 'write the spec for', 'no docs yet', 'docs are messy', 'clean up docs', or any request to create, update, or evaluate project documentation."
+description: "Write, maintain, and audit functional and each technical domain (design, infra, data, implementation) documentation for a project. Use when bootstrapping docs from scratch, updating docs after code changes, writing targeted documentation, auditing doc quality, or rewriting messy docs. Triggers on: 'document this', 'bootstrap docs', 'update docs', 'audit my docs', 'rewrite docs', 'docs are outdated', 'are my docs good', 'write the spec for', 'no docs yet', 'docs are messy', 'clean up docs', or any request to create, update, or evaluate project documentation."
 ---
 
 # Corpus
@@ -41,6 +41,7 @@ After mode is confirmed, load:
 1. `rules/core/structure.md` — always
 2. `rules/modes/<mode>.md` — matched to confirmed mode
 3. Additional core files declared inside the mode file
+4. `rules/domains/<domain>.md` — if the target domain is implementation, design, infra, or data
 
 ## Step 3 — Execute
 

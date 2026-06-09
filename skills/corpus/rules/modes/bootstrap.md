@@ -45,10 +45,17 @@ Produce a **proposed domain map**:
 
 ### Phase 2 — Write
 
-Write the full tree following the confirmed domain map. Order:
+Write the full tree following the confirmed domain map. Only write branches confirmed during Phase 1 — do not create empty domain folders.
+
+Write in dependency order — branches that others reference should exist first:
 1. `docs/index.md`
-2. `docs/functional/index.md` → each functional domain file
-3. `docs/technical/index.md` → each technical domain file
+2. `docs/functional/` — foundation, referenced by everything
+3. `docs/implementation/` — references functional
+4. `docs/design/` — references functional
+5. `docs/data/` — references functional and implementation
+6. `docs/infra/` — references implementation and data
+
+For each branch, load `rules/domains/<domain>.md` before writing its files.
 
 Apply `writing.md` rules fully. Flag every inference with the appropriate confidence marker. Do not skip gaps — make them visible.
 

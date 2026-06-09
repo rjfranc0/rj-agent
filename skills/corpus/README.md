@@ -35,7 +35,16 @@ docs/
 ├── functional/
 │   ├── index.md
 │   └── <domain>.md or <domain>/
-└── technical/
+├── implementation/
+│   ├── index.md
+│   └── <domain>.md or <domain>/
+├── design/
+│   ├── index.md
+│   └── <domain>.md or <domain>/
+├── infra/
+│   ├── index.md
+│   └── <domain>.md or <domain>/
+└── data/
     ├── index.md
     └── <domain>.md or <domain>/
 ```
@@ -48,10 +57,15 @@ Full structure rules in `rules/core/structure.md`.
 |---|---|
 | `rules/core/structure.md` | Doc tree layout, split decisions, references |
 | `rules/core/gather.md` | Content classification, discovery, dead ends |
-| `rules/core/writing.md` | Quality standard, confidence flagging, writing rules |
+| `rules/core/writing.md` | Universal quality standard, confidence flagging, domain loading |
 | `rules/core/output.md` | Propose vs. write threshold, conflict handling |
 | `rules/modes/bootstrap.md` | Bootstrap workflow |
 | `rules/modes/update.md` | Update workflow |
 | `rules/modes/targeted.md` | Targeted workflow |
 | `rules/modes/audit.md` | Audit workflow |
 | `rules/modes/rewrite.md` | Rewrite workflow |
+| `rules/domains/functional.md` | Business rules, feature specs, user flows |
+| `rules/domains/implementation.md` | Module contracts, decisions, patterns |
+| `rules/domains/design.md` | Tokens, components, interaction patterns, guidelines |
+| `rules/domains/infra.md` | Deployment, environments, operations |
+| `rules/domains/data.md` | Schemas, models, migrations, data contracts |
