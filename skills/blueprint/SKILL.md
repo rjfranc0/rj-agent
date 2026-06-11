@@ -76,6 +76,8 @@ Files: `path/to/file.ts`, `path/to/other.ts`
 - For new files that must be created: derive the path from existing project conventions, prefix with `[new]` — e.g. `[new] src/utils/export.ts`
 - Steps are instructions, not suggestions: "Add X to Y", not "Consider adding X"
 - `[example]` snippets only when: the pattern is non-standard, the API is subtle, or wrong implementation is likely. Never for CRUD, standard lib usage, or anything a competent dev writes from memory. Snippets show the **shape** of the pattern — pseudocode-level, with placeholder names. Not copy-paste-ready code; the agent adapts them to the actual types, names, and conventions in the codebase
+- For UI tasks: specify contracts and behavior — data in, state ownership, user-visible outcomes. Never component composition or visual design; the frontend specialist owns design
+- For data tasks: declare the data contract — entities, fields, relations the feature needs. Never physical design (indexes, constraints strategy, migration mechanics); the database specialist owns it
 - Never make an architectural decision unilaterally — surface it in the pre-draft block
 
 End the implementation plan with a flat execution queue:
