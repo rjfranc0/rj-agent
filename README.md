@@ -20,7 +20,8 @@ This is a supervised, human-led pipeline: the human is the runtime, skills are s
 Design principles:
 
 - The human is the runtime; skills are stations, boundaries are pause points
-- Artifacts are the interface — docs (`corpus`), spec + plan (Linear issue), QA findings (issue comments); never session memory
+- Artifacts are the interface — docs (`corpus`), spec + plan (Linear issue), QA findings (.md reports → Linear PR comments); never session memory
+- Blueprint owns the what and the seams; specialists own the how — any judgment phase (design, data modeling, test strategy) stays with its specialist
 - Split skills when core judgment diverges; lazy-load rule files when only domain rules vary
 - Orchestrators dispatch curated context slices; specialists never talk to each other
 
@@ -50,13 +51,13 @@ Design principles:
 │       │           │           │           │              │     ▲         │
 │       ▼           ▼           ▼           ▼              │     │ fix-    │
 │    [vera]      [hugo]     [aurora]     [ferran]          │     │ loop    │
-│   (postgres  (node/      (design &   (rust &            │     │         │
-│    /ORM)      fastify)    react)      tauri)             ▼     │         │
+│   (postgres  (node/      (design &     (rust &           │     │         │
+│    /ORM)      fastify)    react)        tauri)           ▼     │         │
 │       │           │           │           │       ┌──────────────────┐   │
 │       └───────────┴─────┬─────┴───────────┘       │     [tessa]      │   │
-│                         ▼                         │  levels: unit /  │   │
-│   ┌──────────────────────────────────────────┐    │  integration /   │   │
-│   │              [corpus]                    │    │  e2e (from plan) │   │
+│                         ▼                         │  decides levels: │   │
+│   ┌──────────────────────────────────────────┐    │  unit / integra- │   │
+│   │              [corpus]                    │    │  tion / e2e      │   │
 │   │  (Docs = cognitive model; returns        │    └────────┬─────────┘   │
 │   │   context packet to the lead)            │             ▼             │
 │   └──────────────────────────────────────────┘    ┌──────────────────┐   │
@@ -65,9 +66,9 @@ Design principles:
 │   corpus → tessa → argus →                        │  security / perf │   │
 │   fix-loop (original specialist) → done           │  / quality       │   │
 │                                                   └──────────────────┘   │
-│   Artifact: QA findings = Linear issue comments                          │
-│   (one comment per pass, replies = fix-loop; human diff                  │
-│    threads readable as review input)                                     │
+│   Artifact: QA findings = .md reports, pasted by the human as            │
+│   Linear PR comments (one per pass; fix-loop sessions read them          │
+│   back via diff threads — issue stays pre-code: spec, plan, prep)        │
 └──────────────────────────────────────────────────────────────────────────┘
     │
     │  Deployment (pipeline deploys, human presses the button)
