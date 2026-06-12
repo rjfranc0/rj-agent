@@ -90,7 +90,7 @@ Design principles:
 | `aurora` | Frontend specialist (design & React) | *Dawn* — beauty, what the user sees | ✅ |
 | `atlas` | Fullstack lead — dispatches context slices | Titan holding the world — carries the whole map without building | 🔜 |
 | `tessa` | Test writer (unit/integration/e2e) | *Harvester* — gathers proof from the plan | ✅ |
-| `argus` | Code reviewer (security/perf/quality passes) | Hundred-eyed watchman — nothing slips past | 🔜 |
+| `argus` | Code reviewer (security/perf/quality passes) | Hundred-eyed watchman — nothing slips past | ✅ |
 | `ferran` | Systems specialist (Rust & Tauri) | *Blacksmith, iron* — iron oxidizes into rust | 🔜 |
 | `silas` | DevOps — maintains CI/deploy/monitoring machinery | *Forest keeper* — tends the ecosystem, builds nothing new | 🔜 |
 
