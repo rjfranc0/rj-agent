@@ -131,3 +131,57 @@ if (user) {
 if (!user || !user.isActive) return null
 return <Dashboard />
 ```
+
+## Loading states are layout-stable
+
+Loading must never change the page structure. Layout shift during load is both a UX failure and a CLS violation.
+
+- **Suspense-first** — boundary per independent section, not one global spinner. Each section streams in without moving its neighbors.
+- **Skeletons match the final layout** — same dimensions, same structure. A skeleton that doesn't match is just a deferred layout shift.
+- **No early-return spinners** that swap a small loader for full content:
+
+```tsx
+// Wrong — page structure changes when loading completes
+if (isLoading) return <Spinner />
+return <FullPageContent />
+
+// Right — Suspense boundary, layout reserved
+<Suspense fallback={<ContentSkeleton />}>
+  <Content />
+</Suspense>
+```
+
+## Error states are designed states
+
+An error is a state the user sees — design it like any other.
+
+- Error boundaries around data-driven sections, not just the root
+- Errors render in place with the same layout footprint as the content they replace
+- Every error state offers a path forward (retry, fallback content, navigation)
+- Never swallow errors to keep the UI clean — surface them, designed
+
+## Every mutation has visible feedback
+
+A user action that mutates data always shows its lifecycle:
+
+- **Pending** — disable the trigger, show in-flight state (`isPending` label or indicator)
+- **Success** — confirm visibly (state change, toast, optimistic result)
+- **Error** — surface it with a retry path
+
+```tsx
+<button onClick={() => mutate(payload)} disabled={isPending}>
+  {isPending ? 'Saving…' : 'Save'}
+</button>
+```
+
+Optimistic updates where the result is predictable and rollback is cheap — with rollback wired on error.
+
+## Memoization is measured, not blanket
+
+Profile first. Memoize what's expensive, not everything.
+
+- `useMemo` — expensive derivations only: filtering/sorting large arrays, heavy transforms. Not string concat, not arithmetic.
+- `useCallback` — only when the function is passed to a memoized child or used in effect deps. Inline handlers staying local don't need it.
+- `React.memo` — heavy pure components receiving stable props. Wrapping everything adds comparison overhead for nothing.
+
+Blanket memoization is noise that hides the real hot paths.

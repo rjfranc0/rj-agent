@@ -42,6 +42,7 @@ Two phases, always in order:
 | `rules/coding/RULES.md` | Coding non-negotiables | Always |
 | `rules/coding/react.md` | Franco's React standards | Always |
 | `rules/coding/composition.md` | Component architecture patterns | Component creation only |
+| `rules/coding/seo.md` | SEO, structured data, Core Web Vitals build rules | Pages and routes only |
 
 ## Out of scope
 

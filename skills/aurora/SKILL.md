@@ -57,6 +57,7 @@ Infer Mode 1 vs 2 from context. **Mode 3 is never inferred — only triggered by
 | `rules/coding/RULES.md` | Always |
 | `rules/coding/react.md` | Always |
 | `rules/coding/composition.md` | Creating new components only — not when assembling existing ones |
+| `rules/coding/seo.md` | Building pages, routes, or marketing surfaces — not isolated components |
 
 Implement React code that matches the design declaration exactly.
 Execute exactly what was asked — constraints respected, gaps filled, no more, no less.
