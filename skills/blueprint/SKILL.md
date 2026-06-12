@@ -76,8 +76,6 @@ Files: `path/to/file.ts`, `path/to/other.ts`
 - For new files that must be created: derive the path from existing project conventions, prefix with `[new]` — e.g. `[new] src/utils/export.ts`
 - Steps are instructions, not suggestions: "Add X to Y", not "Consider adding X"
 - `[example]` snippets only when: the pattern is non-standard, the API is subtle, or wrong implementation is likely. Never for CRUD, standard lib usage, or anything a competent dev writes from memory. Snippets show the **shape** of the pattern — pseudocode-level, with placeholder names. Not copy-paste-ready code; the agent adapts them to the actual types, names, and conventions in the codebase
-- For UI tasks: specify contracts and behavior — data in, state ownership, user-visible outcomes. Never component composition or visual design; the frontend specialist owns design
-- For data tasks: declare the data contract — entities, fields, relations the feature needs. Never physical design (indexes, constraints strategy, migration mechanics); the database specialist owns it
 - Never make an architectural decision unilaterally — surface it in the pre-draft block
 
 End the implementation plan with a flat execution queue:
@@ -126,12 +124,38 @@ Manual:
 - [Edge case or related behavior to spot-check] → [expected result]
 ```
 
+### `### Observability` (conditional)
+
+Blueprint judges whether to add this section — it's not in the stub. Add it when the implementation introduces things production needs visibility into:
+
+- New endpoints or routes
+- Background jobs, queues, scheduled tasks
+- External integrations (third-party APIs, webhooks)
+- Error paths that matter in production
+- Anything a dashboard or alert would later consume
+
+Skip it when nothing qualifies — a UI-only change or small chore doesn't need observability noise.
+
+**Declare the *what*, never the *how*.** Requirements state what must be observable; the specialist picks the library, format, and level. Same boundary as the rest of the plan: blueprint owns the seams.
+
+```
+### Observability
+
+- [Component or flow]: [what must be observable] — [why it matters in prod]
+```
+
+Examples of the right level:
+- `POST /export`: request latency and failure rate — export is user-facing and long-running
+- `sync job`: log each failed item with source ID — partial failures must be diagnosable
+
+Wrong level (specialist territory): "add a `pino.error()` call in the catch block", "use `prom-client` histogram".
+
 ## Output rules
 
 - Output content only — no preamble, no "here's your plan", no closing summary
 - Start directly with `### Implementation plan`
 - Never reference files that don't exist in the provided codebase context
-- Never fill sections absent from the original stub
+- Never fill sections absent from the original stub — **exception**: `### Observability`, which blueprint adds on its own judgment (see above)
 - Never suggest refactors or improvements outside the issue scope
 
 ## Delegation

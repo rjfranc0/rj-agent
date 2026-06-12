@@ -17,6 +17,7 @@ Give it the issue and project context. It reads both fully, flags architectural 
 | `### Functional tests` | feat |
 | `### Regression tests` | bug |
 | `### Key regression tests` | refactor |
+| `### Observability` | added on blueprint's judgment — declares *what* must be observable, specialists decide *how* |
 
 ## Implementation plan format
 
