@@ -92,7 +92,7 @@ Design principles:
 | `tessa` | Test writer (unit/integration/e2e) | *Harvester* — gathers proof from the plan | ✅ |
 | `argus` | Code reviewer (security/perf/quality passes) | Hundred-eyed watchman — nothing slips past | ✅ |
 | `ferran` | Systems specialist (Rust & Tauri) | *Blacksmith, iron* — iron oxidizes into rust | ✅ |
-| `silas` | DevOps — maintains CI/deploy/monitoring machinery | *Forest keeper* — tends the ecosystem, builds nothing new | 🔜 |
+| `silas` | DevOps — maintains CI/deploy/monitoring machinery | *Forest keeper* — tends the ecosystem, builds nothing new | ✅ |
 
 ## Setup
 
