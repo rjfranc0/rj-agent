@@ -79,20 +79,20 @@ Design principles:
 
 ## Skills
 
-| Skill | Role | Name meaning | Status |
-|---|---|---|---|
-| `facet` | Brainstorming & thinking partner | One cut face of a gem — examining an idea angle by angle | ✅ |
-| `brief` | Functional issue writer | The brief — what must be done, nothing about how | ✅ |
-| `blueprint` | Technical strategy & test plan | The build plan drawn before construction | ✅ |
-| `corpus` | AI-first documentation engine | Latin *body* — the body of knowledge, the system's cognitive model | ✅ |
-| `vera` | Database specialist (Postgres/ORM) | *Truth* — data integrity | ✅ |
-| `hugo` | Backend specialist (Node/Fastify) | *Mind, intellect* — the reasoning core | ✅ |
-| `aurora` | Frontend specialist (design & React) | *Dawn* — beauty, what the user sees | ✅ |
-| `atlas` | Fullstack lead — dispatches context slices | Titan holding the world — carries the whole map without building | 🔜 |
-| `tessa` | Test writer (unit/integration/e2e) | *Harvester* — gathers proof from the plan | ✅ |
-| `argus` | Code reviewer (security/perf/quality passes) | Hundred-eyed watchman — nothing slips past | ✅ |
-| `ferran` | Systems specialist (Rust & Tauri) | *Blacksmith, iron* — iron oxidizes into rust | ✅ |
-| `silas` | DevOps — maintains CI/deploy/monitoring machinery | *Forest keeper* — tends the ecosystem, builds nothing new | ✅ |
+| Skill | Role | Name meaning |
+|---|---|---|
+| `facet` | Brainstorming & thinking partner | One cut face of a gem — examining an idea angle by angle |
+| `brief` | Functional issue writer | The brief — what must be done, nothing about how |
+| `blueprint` | Technical strategy & test plan | The build plan drawn before construction |
+| `corpus` | AI-first documentation engine | Latin *body* — the body of knowledge, the system's cognitive model |
+| `vera` | Database specialist (Postgres/ORM) | *Truth* — data integrity |
+| `hugo` | Backend specialist (Node/Fastify) | *Mind, intellect* — the reasoning core |
+| `aurora` | Frontend specialist (design & React) | *Dawn* — beauty, what the user sees |
+| `atlas` | Fullstack lead — dispatches context slices | Titan holding the world — carries the whole map without building |
+| `tessa` | Test writer (unit/integration/e2e) | *Harvester* — gathers proof from the plan |
+| `argus` | Code reviewer (security/perf/quality passes) | Hundred-eyed watchman — nothing slips past |
+| `ferran` | Systems specialist (Rust & Tauri) | *Blacksmith, iron* — iron oxidizes into rust |
+| `silas` | DevOps — maintains CI/deploy/monitoring machinery | *Forest keeper* — tends the ecosystem, builds nothing new |
 
 ## Setup
 
