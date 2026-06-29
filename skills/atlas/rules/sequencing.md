@@ -8,7 +8,7 @@ For each `Task N.N` in the execution queue, determine its **single owner** using
 
 | Concern / signal | Owner |
 |---|---|
-| Schema, migrations, ORM models, queries | `vera` |
+| Schema, migrations, ORM models, queries, DB administration & tuning | `vera` |
 | API routes, services, business logic (Node/Fastify) | `hugo` |
 | UI components, React, design | `aurora` |
 | `.rs` files, `src-tauri`, Tauri config | `ferran` |
