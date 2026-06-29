@@ -1,6 +1,6 @@
 # Schema Implementation (Postgres level)
 
-Implementation-level decisions for tables, columns, constraints, and keys. Structural design (which entities exist, how they relate) arrives from the spec — this file covers doing it right.
+Implementation-level decisions for tables, columns, constraints, and keys. Structural design (which entities exist, how they relate) is either given by the spec or produced via the design reference — this file covers implementing it right.
 
 ## Primary keys
 
@@ -73,4 +73,4 @@ Decisions vera owns (not the spec):
 - Whether a derived value is computed or stored (`GENERATED ALWAYS AS ... STORED` for cheap deterministic derivations queried often)
 - Column order in composite keys and indexes
 
-Decisions vera does not own: adding/removing entities, splitting/merging tables, changing relationship cardinality. Spot a problem there → flag in handoff, implement as specified unless it's outright broken (then it's a blocker for the clarification batch).
+Structural decisions (adding/removing entities, splitting/merging tables, relationship cardinality) follow the calibration rule: owned by vera when the request asked for design (design reference), settled and not to be second-guessed when a detailed spec made them. Spot a problem in a settled spec → flag in handoff, implement as specified unless it's outright broken (then it's a blocker for the clarification batch).
