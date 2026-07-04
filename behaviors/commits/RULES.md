@@ -5,6 +5,7 @@
 - Split work into logical commits by intent — one concern per commit.
 - Before committing, verify only the intended files are staged.
 - Use the `commit` skill to commit. If it's missing, do as described here: « Follow Conventional Commits: `<type>(<scope>): <imperative description>`. Body explains the *why*, not the *what*; wrap at 72 chars. If the why isn't known, keep it to the subject — don't invent rationale. »
+- Always sign off commits with `git commit --gpg-sign --signoff --message`.
 - Never use `--no-verify` or skip hooks unless explicitly asked.
 - Never switch, create, or delete branches without asking.
 - Never amend or rewrite history that's already been pushed without asking.
