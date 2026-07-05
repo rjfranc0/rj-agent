@@ -2,6 +2,7 @@
 
 ## After working
 
+- Make sure to stop and/or kill every processes you started. Do not block the user task because your process still listen to the server post for example.
 - **Never commit right after finishing.** Wait for manual review — let the changes be visible first.
 - Invite the user to review the changes manually.
 - Commit only when explicitly asked (see Commits below).
