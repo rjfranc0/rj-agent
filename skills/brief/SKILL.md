@@ -53,6 +53,16 @@ Examples:
 - `chore: configure eslint with project rules`
 - `epic: phase 2 — backend API integration`
 
+## Writing discipline
+
+**Scope.** Every sentence must serve this issue — defining what to build, a rule that applies, or an in-scope edge case. Cut tangents, "worth noting" asides, and references to unrelated parts of the system. Out-of-scope content goes only in an explicit **Out** list, never scattered as prose. Naming things far outside the issue's context is worse than saying nothing.
+
+**Assumptions.** Only assume what's needed to make the issue coherent. Never fabricate business logic, thresholds, or behavior the user didn't imply. If something is genuinely needed but unknown, mark it `[TBD]` — don't invent it.
+
+**No padding.** Drop optional sections that add nothing. No empty edge-case lists, no "N/A", no filler DoD items. A short honest issue beats a padded one.
+
+**Voice.** Description reads functional — a non-technical collaborator should follow it. DoD items are checkable outcomes ("user can export"), not tasks ("add export button").
+
 ## Technical section rule (hard)
 
 For `feat`, `bug`, and `refactor` only — the `## Technical` section is **always a stub**. Fill headers and the warning placeholder only. No content, no suggestions, no "you might want to...". Hard stop.
