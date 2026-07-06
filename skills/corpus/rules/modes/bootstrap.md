@@ -1,8 +1,8 @@
 # Mode: Bootstrap
 
-**Load also**: `gather.md`, `writing.md`, `output.md`
+**Load also**: `gather.md`, `writing.md`, `output.md`, `agent-files.md`
 
-No docs exist → generate the complete `docs/` tree from scratch. This is the seed of the doc lifecycle, not the finished product.
+No docs exist → generate the complete `docs/` tree and agent files from scratch. This is the seed of the doc lifecycle, not the finished product.
 
 ## Quality Bar
 
@@ -29,11 +29,16 @@ Produce a **proposed domain map**:
   - `processing` — charge flow and provider integration
   - `settlement` — reconciliation and payout logic
 
-### Technical domains
+### Implementation domains
 - `api` — route definitions and middleware (simple → single file)
 - `payments/` — payment service implementation
   - `provider` — external provider adapter
   - `reconciliation` — settlement job logic
+
+### Other branches
+- `data/` — schema and data model (confirmed present)
+- `design/` — not applicable for this project
+- `infra/` — not applicable for this project
 
 ### Confidence
 - High: [domains with clear naming and structure]
@@ -45,7 +50,7 @@ Produce a **proposed domain map**:
 
 ### Phase 2 — Write
 
-Write the full tree following the confirmed domain map. Only write branches confirmed during Phase 1 — do not create empty domain folders.
+Write the full tree following the confirmed domain map. Only create branches confirmed in Phase 1. Write in dependency order — branches that others reference should exist first:
 
 Write in dependency order — branches that others reference should exist first:
 1. `docs/index.md`
@@ -61,16 +66,21 @@ Apply `writing.md` rules fully. Flag every inference with the appropriate confid
 
 Output is **large by definition** → write directly to repo (see `output.md`).
 
-### Phase 3 — Bootstrap Summary
+### Phase 3 — Agent Files
+
+Apply `agent-files.md` rules. Generate or update `AGENTS.md` and stub files.
 
 After writing, produce:
+
+### Phase 4 — Bootstrap Summary
 
 ```markdown
 ## Bootstrap Complete
 
 ### Coverage
 - Functional: X domains, Y files
-- Technical: X domains, Y files
+- Implementation: X domains, Y files
+- [other branches if present]
 
 ### Confidence flags
 - Needs verification: [files with high inference load]

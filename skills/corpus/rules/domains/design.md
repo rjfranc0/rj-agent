@@ -22,7 +22,7 @@ Supplements `writing.md` for documenting design systems, guidelines, and UI patt
 
 **Interaction Patterns**
 - Trigger and response — what causes the behavior, what happens
-- Timing and transitions — not implementation values, but the intent (e.g. "fast dismissal, no linger")
+- Timing and transitions — the intent (e.g. "fast dismissal, no linger"), not implementation values
 - Edge cases — what happens on slow connection, empty state, error state
 
 **Guidelines**
