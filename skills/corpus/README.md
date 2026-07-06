@@ -1,6 +1,6 @@
 # corpus
 
-A self-contained skill for writing, maintaining, and auditing structured project documentation.
+A self-contained documentation engine. Generates and maintains a `docs/` tree that acts as the cognitive model of a project — complete enough that any AI agent can implement changes from an incomplete spec using docs alone, without reading the actual code. Any specialist can hand corpus their context (issue, prompt, diff, output) and get structured, correctly placed documentation back.
 
 ## What it does
 
@@ -12,7 +12,7 @@ Generates and maintains a `docs/` tree that acts as the cognitive model of a pro
 |---|---|
 | **Bootstrap** | No docs exist — generate the full tree from scratch |
 | **Update** | Code changed — sync affected doc files |
-| **Targeted** | Document a specific module, feature, or domain |
+| **Targeted** | Document a specific module, feature, domain, or surface artifact |
 | **Audit** | Evaluate doc quality, produce a gap report |
 | **Rewrite** | Fix messy, incomplete, or mis-structured docs |
 
@@ -51,6 +51,16 @@ docs/
 
 Full structure rules in `rules/core/structure.md`.
 
+## Surface Artifacts
+
+Corpus also generates project-level surface artifacts via Targeted mode:
+- **README** — multiple types: `library`, `internal-tool`, `app`, `infra`, `cli`, `monorepo`
+- **Project descriptions** — sized and formatted for any destination (GitHub, `package.json`, Linear, pitch…)
+
+## Agent File Management
+
+Corpus manages `AGENTS.md` and agent-specific stub files (`CLAUDE.md`, `GEMINI.md`, etc.) as part of Bootstrap, Audit, and Rewrite. It enforces a single source of truth model: one `AGENTS.md` containing doc-reading rules, doc map, and inferred project conventions — with all agent-specific files as thin stubs referencing it.
+
 ## Rules Files
 
 | File | Purpose |
@@ -59,6 +69,8 @@ Full structure rules in `rules/core/structure.md`.
 | `rules/core/gather.md` | Content classification, discovery, dead ends |
 | `rules/core/writing.md` | Universal quality standard, confidence flagging, domain loading |
 | `rules/core/output.md` | Propose vs. write threshold, conflict handling |
+| `rules/core/agent-files.md` | Agent file management and `AGENTS.md` structure |
+| `rules/core/surfaces.md` | README types and description snippet formats |
 | `rules/modes/bootstrap.md` | Bootstrap workflow |
 | `rules/modes/update.md` | Update workflow |
 | `rules/modes/targeted.md` | Targeted workflow |

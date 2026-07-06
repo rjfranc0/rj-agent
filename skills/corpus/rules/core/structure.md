@@ -6,20 +6,31 @@ Canonical layout and rules for the `docs/` tree.
 
 ```
 docs/
-├── index.md                      ← Project summary, references functional/ and technical/
+├── index.md                      ← Project summary, references all branches
 ├── functional/
 │   ├── index.md                  ← Domain map, table of contents
 │   ├── <domain>.md               ← Single file when domain is simple
 │   └── <domain>/
 │       ├── index.md              ← Domain summary, table of contents
 │       └── <feature>.md
-└── implementation/
-    ├── index.md                  ← Domain map, table of contents
-    ├── <domain>.md               ← Single file when domain is simple
-    └── <domain>/
-        ├── index.md              ← Domain summary, table of contents
-        └── <feature>.md
+├── implementation/
+│   ├── index.md                  ← Domain map, table of contents
+│   ├── <domain>.md               ← Single file when domain is simple
+│   └── <domain>/
+│       ├── index.md              ← Domain summary, table of contents
+│       └── <feature>.md
+├── design/
+│   ├── index.md
+│   └── <domain>.md or <domain>/
+├── infra/
+│   ├── index.md
+│   └── <domain>.md or <domain>/
+└── data/
+    ├── index.md
+    └── <domain>.md or <domain>/
 ```
+
+Not every project needs all branches. Only create branches confirmed during Bootstrap's domain map phase.
 
 ## Index Files
 
@@ -50,9 +61,19 @@ All references are semantic — the surrounding sentence explains *why* the link
 | Direction | Meaning |
 |---|---|
 | `functional → functional` | Domain dependency ("this feature depends on this rule") |
-| `implementation → functional` | Implementation traces back to business logic |
-| `functional → technical` | Spec points at concrete implementation |
-| `technical → implementation` | Code-level dependency between modules |
+| `functional → implementation` | Business rule is implemented here |
+| `functional → design` | Flow requires this design pattern |
+| `functional → data` | Rule is enforced at the data layer |
+| `implementation → functional` | Code implements this business rule |
+| `implementation → implementation` | Module depends on this service |
+| `implementation → data` | Code depends on this data contract |
+| `implementation → infra` | Code depends on this infrastructure config |
+| `design → functional` | Pattern exists because of this business rule |
+| `design → implementation` | Component maps to this implementation |
+| `infra → implementation` | Config affects this application behavior |
+| `infra → data` | Service owns or depends on this data store |
+| `data → functional` | Schema exists because of this business rule |
+| `data → implementation` | Model is used by this application layer |
 
 Reference syntax:
 ```markdown
@@ -61,7 +82,7 @@ See [@/functional/payments/settlement.md#reconciliation-logic] for the business 
 
 ## Domain Boundaries
 
-Domains are semantic groupings, not folder structures. One domain = one coherent business or technical concern an agent can reason about independently.
+Domains are semantic groupings, not folder structures. One domain = one coherent concern an agent can reason about independently.
 
 Inferring domain boundaries from code:
 1. Read entry points, routes, schemas, config first

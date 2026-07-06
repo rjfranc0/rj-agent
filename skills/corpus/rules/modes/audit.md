@@ -1,6 +1,6 @@
 # Mode: Audit
 
-**Load also**: `writing.md`, `structure.md`
+**Load also**: `writing.md`, `structure.md`, `agent-files.md`
 
 Guardian mode. Enforces the full cognitive model standard. Reports only — never rewrites.
 
@@ -18,6 +18,7 @@ Additionally:
 - All references are valid and semantic — no bare links
 - No unverified `⚠️ Inferred` or `🔍 Bootstrap note` sections remain
 - File structure matches split decision rules from `structure.md`
+- `AGENTS.md` is present, accurate, and canonical
 
 ## Workflow
 
@@ -47,9 +48,16 @@ For each doc file, check against the cognitive model standard:
 - Missing references (behavior implemented elsewhere — should link)
 - Direction mismatches (e.g. functional file containing implementation detail instead of linking)
 
-### Phase 4 — Gap Report
+### Phase 4 — Agent File Audit
 
-Structured output. This is Audit's only output.
+Apply audit scope from `agent-files.md`:
+- Doc-reading rule present and correctly formed
+- Doc map matches actual `docs/` tree
+- No system knowledge that belongs in docs
+- Conventions reflect current codebase
+- Stub files contain only `@AGENTS.md`
+
+### Phase 5 — Gap Report
 
 ```markdown
 ## Audit Report
@@ -64,16 +72,19 @@ Issues that would cause incorrect implementation if followed.
 
 ### Quality Gaps
 Issues that degrade agent understanding.
-- `technical/auth/sessions.md`: decision not documented (why JWT, what was rejected)
+- `implementation/auth/sessions.md`: decision not documented (why JWT, what was rejected)
 - `functional/billing/invoices.md`: edge case vague — "handles failed payments" without conditions
 
 ### Structural Issues
-- `technical/api.md`: 340 lines, above soft cap — review for split candidates
-- `technical/notifications/`: missing index.md
+- `implementation/api.md`: 340 lines, above soft cap — review for split candidates
+- `implementation/notifications/`: missing index.md
 
 ### Inference Flags Outstanding
 - `functional/payments/settlement.md`: 2 Bootstrap notes unverified
-- `technical/payments/provider.md`: 1 Inferred claim needs confirmation
+
+### Agent File Issues
+- [any issues found in `AGENTS.md` or stub files]
+- `implementation/payments/provider.md`: 1 Inferred claim needs confirmation
 
 ### Recommended Actions
 Prioritized fix list for Rewrite mode, highest severity first.

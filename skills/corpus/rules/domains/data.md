@@ -11,16 +11,16 @@ Supplements `writing.md` for documenting data models, schemas, and persistence l
 **Models and Schemas**
 - What the entity represents in business terms — not just field names
 - Every significant field: purpose, constraints, allowed values, nullability
-- Default values and what they mean (not just what they are)
+- Default values and what they mean
 
 **Relationships**
 - How entities relate — type (one-to-many, etc.), directionality, ownership
 - Cascade behavior — what happens to related records on delete or update
-- Join patterns used in practice — not every possible join, but the ones the application actually relies on
+- Join patterns the application actually relies on
 
 **Constraints and Invariants**
 - Business rules enforced at the data layer — unique constraints, check constraints, triggers
-- Invariants that the application layer is responsible for (not enforced by DB but must hold)
+- Invariants the application layer is responsible for (not enforced by DB but must hold)
 - What breaks if a constraint is violated
 
 **Migrations**

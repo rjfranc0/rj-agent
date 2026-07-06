@@ -1,11 +1,12 @@
 ---
 name: corpus
-description: "Write, maintain, and audit functional and each technical domain (design, infra, data, implementation) documentation for a project. Use when bootstrapping docs from scratch, updating docs after code changes, writing targeted documentation, auditing doc quality, or rewriting messy docs. Triggers on: 'document this', 'bootstrap docs', 'update docs', 'audit my docs', 'rewrite docs', 'docs are outdated', 'are my docs good', 'write the spec for', 'no docs yet', 'docs are messy', 'clean up docs', or any request to create, update, or evaluate project documentation."
+description: "Write, maintain, and audit technical and functional documentation for a project. Use when bootstrapping docs from scratch, updating docs after code changes, writing targeted documentation, auditing doc quality, rewriting messy docs, generating a README, or producing project descriptions. Triggers on: 'document this', 'bootstrap docs', 'update docs', 'audit my docs', 'rewrite docs', 'docs are outdated', 'are my docs good', 'write the spec for', 'no docs yet', 'docs are messy', 'clean up docs', 'generate a README', 'write a project description', or any request to create, update, evaluate, or produce project documentation or surface artifacts."
 ---
 
 # Corpus
 
 Generate, maintain, and audit structured project documentation designed as a lazy-loading reference graph — AI-first, token-optimized, and complete enough to serve as the cognitive model of the system.
+Anyone can hand corpus their context — an issue, a prompt, a diff, an output — and corpus will produce structured, correctly placed documentation for it.
 
 ## Core Philosophy
 
@@ -13,7 +14,7 @@ Docs are the cognitive model of the system. Code is the implementation detail.
 
 A doc tree built with this skill should allow any AI agent to:
 - Answer what the system does and why (functional)
-- Answer how it works, what breaks if changed (technical)
+- Answer how it works, what breaks if changed (implementation)
 - Implement a feature from an incomplete spec using doc context alone
 - Act as an interactive wiki — without codebase access
 
@@ -29,6 +30,8 @@ Infer the mode from context. Present it for confirmation before doing anything e
 | **Audit** | Docs exist, nothing changed — quality review requested |
 | **Rewrite** | Docs exist and are messy, outdated structure, or reorganization needed |
 
+Surface artifacts (README, project descriptions) are handled as Targeted sub-cases.
+
 Confirmation line:
 > "Looks like [Mode] — [one-line reason]. Confirm?"
 
@@ -37,11 +40,13 @@ Confirmation line:
 
 ## Step 2 — Load Rules
 
-After mode is confirmed, load:
+After mode is confirmed, load in order:
 1. `rules/core/structure.md` — always
 2. `rules/modes/<mode>.md` — matched to confirmed mode
 3. Additional core files declared inside the mode file
-4. `rules/domains/<domain>.md` — if the target domain is implementation, design, infra, or data
+4. `rules/domains/<domain>.md` — for each target domain (functional, implementation, design, infra, data)
+5. `rules/core/surfaces.md` — if the output is a README or description snippet
+6. `rules/core/agent-files.md` — if the task involves `AGENTS.md` or other agent files
 
 ## Step 3 — Execute
 

@@ -29,7 +29,7 @@ A conflict is when code and docs describe different behavior. Never silently res
 ## Doc Conflicts Found
 
 ### [Conflict title] — severity: breaking / cosmetic
-- **Location**: `technical/payments/settlement.md#reconciliation`
+- **Location**: `implementation/payments/settlement.md#reconciliation`
 - **Doc says**: [current doc claim]
 - **Code says**: [what the code actually does]
 - **Cannot determine**: which is correct — may be a bug or an undocumented change

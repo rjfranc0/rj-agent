@@ -37,8 +37,9 @@ Do not try to reach Audit-clean in a single pass unless scope is very small.
 2. **Prioritize** — breaking gaps first, quality gaps second, structural last
 3. **Scope this pass** — decide what will be addressed, do not overcommit
 4. **Confirm scope** — state what will be rewritten and why, wait for confirmation
-5. **Rewrite** — apply full `writing.md` standard to targeted sections
-6. **Pass summary** — document what improved and what remains
+5. **Load domain rules** — `rules/domains/<domain>.md` for each domain being rewritten
+6. **Rewrite** — apply full `writing.md` standard to targeted sections
+7. **Pass summary** — document what improved and what remains
 
 Scope determines output strategy per `output.md`. Structural rewrites (moving files, splitting domains) → write directly to repo. Section-level improvements → propose in chat.
 

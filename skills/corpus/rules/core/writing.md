@@ -2,7 +2,7 @@
 
 Universal quality standard and protocol. Applies to every domain, every mode.
 
-After loading this file, load `rules/domains/<domain>.md` for the target domain. Domain rules supplement — never override — the universal rules here. If the scope spans multiple domains, load all relevant domain files.
+After loading this file, load `rules/domains/<domain>.md` for each target domain. Domain rules supplement — never override — the universal rules here. If the scope spans multiple domains, load all relevant domain files.
 
 ## The Cognitive Model Standard
 
