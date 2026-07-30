@@ -55,7 +55,19 @@ Examples:
 
 ## Writing discipline
 
-**Scope.** Every sentence must serve this issue — defining what to build, a rule that applies, or an in-scope edge case. Cut tangents, "worth noting" asides, and references to unrelated parts of the system. Out-of-scope content goes only in an explicit **Out** list, never scattered as prose. Naming things far outside the issue's context is worse than saying nothing.
+**Scope.** Every sentence must serve this issue — defining what to build, a rule that applies, or an in-scope edge case. Cut tangents, "worth noting" asides, and references to unrelated parts of the system. Naming things far outside the issue's context is worse than saying nothing.
+
+**Self-contained and impersonal.** Describe the task, not the roadmap, product, or team.
+
+- **No actors.** Never name a person, role, or team, and never use "we". Not "Bob will handle this", not "the dev already did this". State facts about the work: "this is already done", "this is for later".
+- **No issue references.** Never cite issue IDs or link to other issues in prose. "Issue #42 covers this" → "this is handled separately", or omit it entirely. Prose references break tracker-agnosticism and go stale when work moves.
+- **No out-of-scope work, including prerequisites.** An issue about the dashboard has no reason to mention the login page, even as a dependency — the implication is implicit. If a dependency creates real ambiguity, ask the user to mark it as a prerequisite in the tracker instead of describing it in prose.
+
+The tracker already holds this: assignee for actors, roadmap order for sequencing, blocks/blocked-by for dependencies. Duplicating it in prose is redundant and rots.
+
+**Scope boundaries.** An explicit **Out** list is allowed — and expected in `refactor` — but only to bound ambiguity *inside the issue's own domain*. "Out: session storage layer" on an auth refactor answers a question the reader would actually have. It is not a place to list unrelated work.
+
+**Epics and milestones.** Listing sub-issues or phases is the content of those templates, not a violation. Prerequisite prose between them still is — the ordering and tracker relations already carry it.
 
 **Assumptions.** Only assume what's needed to make the issue coherent. Never fabricate business logic, thresholds, or behavior the user didn't imply. If something is genuinely needed but unknown, mark it `[TBD]` — don't invent it.
 
