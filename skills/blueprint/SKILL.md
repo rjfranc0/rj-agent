@@ -1,169 +1,184 @@
 ---
 name: blueprint
-description: "Fill the ## Technical stub in a brief-generated issue with a codebase-aware, agent-executable implementation plan. Use after `brief` has produced a feat, bug, or refactor issue draft that has an empty ## Technical section. Triggers on: 'fill the technical section', 'write the implementation plan', 'blueprint this issue', 'add technical details to this issue', 'write the plan for this issue', or when an issue has an empty ## Technical stub and codebase context is available. Requires full project codebase access — do not use without it."
+description: "Fill the ## Technical stub in a brief-generated issue with the decisions, contracts, ordered work units, and proof that cannot be left to isolated implementers. Use after `brief` has produced a feat, bug, or refactor issue draft that has an empty ## Technical section. Triggers on: 'fill the technical section', 'write the implementation plan', 'blueprint this issue', 'add technical details to this issue', 'write the plan for this issue', or when an issue has an empty ## Technical stub and codebase context is available. Requires full project codebase access — do not use without it."
 ---
 
 # Blueprint
 
-Fill the `## Technical` stub in a `brief`-generated issue with a codebase-aware, agent-executable implementation plan.
+Fill the `## Technical` stub in a `brief`-generated issue.
 
-This is a technical partner, not a redactor. It reads the full issue and codebase, synthesizes independently, surfaces critical questions in one shot, then drafts.
+You decide only what cannot be decided in isolation. Whoever implements each unit works alone, with the codebase and your output — they own the *how*. You own the *what* and the seams: decisions with real trade-offs, contracts between concerns, the order of work, and what must be proven.
+
+You are a technical partner, not a planner of steps. Never write implementation steps, code snippets, or instructions a competent implementer would work out from the codebase.
 
 ## Prerequisites
 
-This skill requires:
-- A `brief`-generated issue with an empty `## Technical` section (`feat`, `bug`, or `refactor` type only)
-- Full codebase context — relevant files, structure, modules, existing patterns
+- A `brief`-generated issue with an empty `## Technical` section (`feat`, `bug`, or `refactor` only)
+- Full codebase context — structure, modules, existing patterns and conventions
 
-**If codebase context is missing or insufficient: stop and say so explicitly before doing anything else.** Do not attempt to draft without it. Name specifically what's missing.
+**If codebase context is missing or insufficient: stop and say so before anything else.** Name specifically what's missing.
 
 ## Interaction model
 
 **One-pass understanding. One-batch questions. One draft.**
 
-1. **Read** — absorb the full issue and codebase context
-2. **Identify** — find all blockers: ambiguities, architectural decisions, missing context
-3. **Ask once** — surface everything in a single structured block (see format below)
-4. **Draft** — after the user responds, produce the complete `## Technical` content
+1. **Read** — the full issue and codebase context
+2. **Sort the gaps**:
+   - Blocking or costly to reverse → ask
+   - Reversible → decide yourself, record as `[assumed]` in `### Decisions`
+3. **Ask once** — everything in a single block (format below). Skip if nothing blocks.
+4. **Draft** — the complete `## Technical` content, right after the answers
 
-No slow back-and-forth. No one-question-at-a-time. No interrogation. If nothing is unclear — skip step 3 and draft immediately.
+Never ask one question at a time. Never run a second round.
 
-## Pre-draft question format
-
-When clarification is needed, present it as a single structured block:
+### Question format
 
 ```
 **Before drafting, I need to clarify:**
 
 **Architectural decisions:**
-- [Decision]: [Option A] vs [Option B] — [why it materially affects the plan]
+- [Decision]: [Option A] vs [Option B] — [why it materially changes the work]
+
+**Missing conventions:**
+- [Convention a contract needs that the codebase doesn't have yet] — [your recommended standard]
 
 **Ambiguities:**
-- [What's unclear in the issue or codebase, and how it blocks the plan]
+- [What's unclear in the issue, and what it blocks]
 
 **Missing context:**
-- [Specific file, module, or pattern not visible in the provided context]
+- [Specific file, module, or pattern not visible]
 ```
 
-User responds once. Draft immediately after — no follow-up rounds.
+Drop any group with nothing in it.
 
-## Output: `## Technical`
+## Output
 
-Fill exactly the sections present in the issue's `## Technical` stub. Never add or remove sections.
+Sections, in this order. Fill the stub's sections; add the conditional ones only when their condition holds.
+
+| Section | When |
+|---|---|
+| `### Decisions` | At least one locked or assumed decision |
+| `### Contracts` | Two or more units share a seam |
+| `### Implementation plan` | Always |
+| Test sections | Always — exactly those in the stub |
+| `### Observability` | Something production needs visibility into |
+
+### `### Decisions`
+
+Every call you made beyond what the issue states — nothing the issue already says.
+
+```
+- [Decision] — [one-line reason]
+- [assumed] [Decision] — [what was missing that forced the assumption]
+```
+
+Unmarked lines were locked with the user in the question batch. `[assumed]` lines are yours, made because the gap was reversible.
+
+### `### Contracts`
+
+A contract is a convention two sides build against without talking to each other. It is the one part of your output that is fixed: implementers cannot adapt it.
+
+Write each contract **completely, following the established standard for its kind** — an HTTP endpoint as method, path, auth, request, and every response status; a table as columns, types, constraints, indexes; an event as name, payload, and emitter; and so on. Every contract covers the **happy path and the failure cases**.
+
+- **Existing conventions win.** If the codebase already has an error format, a response envelope, or naming rules, follow them.
+- **A missing convention is a question**, never an invention — ask in the batch, record the answer in `### Decisions`.
+- Shape only — names, types, statuses. Never implementation.
+
+```
+**C1 — [Name]** (Unit N → Unit M)
+[the contract, in the standard notation for its kind]
+```
+
+`(Unit N → Unit M)` is producer → consumer(s).
 
 ### `### Implementation plan`
 
-Group tasks into phases by concern. Use only phases that apply — don't force structure.
-
-Typical phases: Setup / Data layer / Business logic / API or routing / UI / Integration / Tests
-
-**Phase format:**
+Ordered work units. Unit order is execution order.
 
 ```
-#### Phase N — [Concern]
-
-**Task N.N — [Short imperative title]**
-Files: `path/to/file.ts`, `path/to/other.ts`
-1. [Concrete step — specific enough to execute without interpretation]
-2. [Next step]
-3. ...
-[example] `minimal snippet showing the non-obvious pattern or API shape`
+#### Unit N — [Short title] `[concern]`
+Outcome: [what exists or behaves when this unit is done]
+Touches: `path/to/file.ts`, `[new] path/to/new.ts`
+Insights: [non-obvious facts only — a gotcha, an existing pattern to reuse, a codebase constraint]
 ```
 
-**Task rules:**
-- One task = one coherent unit of work (one file group, one concern)
-- File paths must be explicit and verified against codebase context — never invent paths
-- For new files that must be created: derive the path from existing project conventions, prefix with `[new]` — e.g. `[new] src/utils/export.ts`
-- Steps are instructions, not suggestions: "Add X to Y", not "Consider adding X"
-- `[example]` snippets only when: the pattern is non-standard, the API is subtle, or wrong implementation is likely. Never for CRUD, standard lib usage, or anything a competent dev writes from memory. Snippets show the **shape** of the pattern — pseudocode-level, with placeholder names. Not copy-paste-ready code; the agent adapts them to the actual types, names, and conventions in the codebase
-- Never make an architectural decision unilaterally — surface it in the pre-draft block
+**Concern tags** — exactly one per unit:
 
-End the implementation plan with a flat execution queue:
+| Tag | Covers |
+|---|---|
+| `data` | Schema, migrations, ORM models, queries |
+| `backend` | Routes, services, business logic |
+| `frontend:create` | A new page or screen, a frontend draft — or any frontend work when the project has no design system yet |
+| `frontend:redesign` | Changing the visual language of existing UI |
+| `frontend:feature` | Features, refactors, and code-focused work inside UI already scoped by a design system |
+| `rust` | Rust code, Tauri commands and config |
+| `infra` | CI, Dockerfiles, deploy scripts, monitoring and proxy configs |
 
-```
-**Execution order**
-1. Task 1.1 — [title]
-2. Task 1.2 — [title]
-...
-N. Done — [one sentence describing the shipped result]
-```
+**Unit rules:**
+- One unit, one concern. Consecutive work in the same concern is one unit.
+- Outcome is observable behavior or a verifiable result, never a list of steps.
+- Touches is context, not a mandate: paths verified against the codebase; new files derived from project conventions, prefixed `[new]`.
+- Insights is optional. Omit it rather than state the obvious.
 
 ### Test sections
 
-Fill based on issue type — match exactly what's in the stub:
+Fill exactly the test sections in the stub:
 
-| Issue type | Sections to fill |
+| Issue type | Sections |
 |---|---|
 | `feat` | `### Automated tests` + `### Functional tests` |
 | `bug` | `### Regression tests` |
 | `refactor` | `### Key regression tests` |
 
-**`### Automated tests` (feat only):**
-New automated tests to write. Test case names with intent, inferred from implementation tasks. No code stubs, no assertions.
+**`### Automated tests`** — must-hold statements: behavior that must be true once the work ships. No module names, no test layer, no test names — how and where to test is the tester's call.
 
 ```
-- `[module or component]`: [behavior] when [condition]
-- `[module or component]`: [behavior] given [state]
+- [Behavior that must hold]
+- [C1] [Contract behavior that must hold — happy path or failure case]
 ```
 
-**`### Functional tests` (feat only):**
-Manual verification steps. Specific user flows, not abstract test categories.
+Every contract gets at least one `[Cn]` statement.
+
+**`### Functional tests`** — manual verification flows:
 
 ```
 - [User action] → [expected result]
 ```
 
-**`### Regression tests` (bug) and `### Key regression tests` (refactor):**
-These are primarily manual — steps to verify the fix holds or existing behavior is preserved. If the bug warrants a new automated test, add it as a single line before the manual steps, prefixed with `[new test]`.
+**`### Regression tests` / `### Key regression tests`** — manual steps proving the fix holds or behavior is preserved. If the change warrants a new automated check, add must-hold statements first, prefixed `[new test]`:
 
 ```
-[new test] `[module]`: [bug scenario] no longer reproduces when [condition]  ← only if warranted
+[new test] [Behavior that must hold]
 
 Manual:
-- [Action to verify the fix or check for regressions] → [expected result]
-- [Edge case or related behavior to spot-check] → [expected result]
+- [Action] → [expected result]
 ```
 
-### `### Observability` (conditional)
+### `### Observability`
 
-Blueprint judges whether to add this section — it's not in the stub. Add it when the implementation introduces things production needs visibility into:
+Add it when the work introduces something production needs visibility into: new endpoints, background jobs or scheduled tasks, external integrations, error paths that matter in production, anything a dashboard or alert would consume. Skip it otherwise.
 
-- New endpoints or routes
-- Background jobs, queues, scheduled tasks
-- External integrations (third-party APIs, webhooks)
-- Error paths that matter in production
-- Anything a dashboard or alert would later consume
-
-Skip it when nothing qualifies — a UI-only change or small chore doesn't need observability noise.
-
-**Declare the *what*, never the *how*.** Requirements state what must be observable; the specialist picks the library, format, and level. Same boundary as the rest of the plan: blueprint owns the seams.
+Declare the *what*, never the *how* — the implementer picks library, format, and level.
 
 ```
-### Observability
-
 - [Component or flow]: [what must be observable] — [why it matters in prod]
 ```
 
-Examples of the right level:
-- `POST /export`: request latency and failure rate — export is user-facing and long-running
-- `sync job`: log each failed item with source ID — partial failures must be diagnosable
-
-Wrong level (specialist territory): "add a `pino.error()` call in the catch block", "use `prom-client` histogram".
-
 ## Output rules
 
-- Output content only — no preamble, no "here's your plan", no closing summary
-- Start directly with `### Implementation plan`
-- Never reference files that don't exist in the provided codebase context
-- Never fill sections absent from the original stub — **exception**: `### Observability`, which blueprint adds on its own judgment (see above)
-- Never suggest refactors or improvements outside the issue scope
+- Content only — no preamble, no closing summary
+- Start directly with the first applicable section
+- Never reference files that don't exist in the codebase, except `[new]` paths
+- Never add sections beyond the stub and the conditional ones above
+- Never suggest work outside the issue's scope
+- Never write implementation steps or code snippets
 
 ## Delegation
 
-When the user asks to update, push, or sync the issue in a tracker (Linear, GitHub, etc.):
+When the user asks to update, push, or sync the issue in a tracker:
 
 1. Complete the draft first — always
 2. Hand off to the platform tool with the filled `## Technical` content and the issue identifier
-3. The skill's job ends when the draft is ready — the platform tool handles the update
+3. Your job ends when the draft is ready
 
 Never call a platform tool before the draft is complete.

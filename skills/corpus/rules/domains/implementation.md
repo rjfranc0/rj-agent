@@ -1,10 +1,12 @@
 # Domain: Implementation
 
-Supplements `writing.md` for documenting application code structure, module behavior, and technical decisions.
+Supplements `writing.md` for documenting application code structure, module behavior, technical decisions, and project conventions.
 
 ## Scope
 
-`docs/implementation/` covers: module structure, service contracts, function behavior, API design, architectural decisions, and implementation patterns. It does not cover business rules or user flows — that belongs in `functional/`. It does not cover infrastructure — that belongs in `infra/`.
+`docs/implementation/` covers: architecture, module structure, service contracts, function behavior, API design, architectural decisions, implementation patterns, and project-wide conventions. It does not cover business rules or user flows — that belongs in `functional/`. It does not cover infrastructure — that belongs in `infra/`.
+
+`implementation/index.md` holds the architecture overview: service boundaries, layer responsibilities, data flow.
 
 ## What a Complete Implementation Doc Must Cover
 
@@ -31,6 +33,19 @@ Supplements `writing.md` for documenting application code structure, module beha
 - Non-obvious patterns used and why they were chosen
 - Where the pattern is applied consistently across the codebase
 - What breaks if the pattern is deviated from
+
+## Conventions — `implementation/conventions.md`
+
+One file, always present. The project's conventions, inferred from the codebase — complete enough that the project can be worked on from docs alone, on any machine, without external skills or configs.
+
+- **Naming** — files, folders, functions, variables, domain terms
+- **Error handling** — how errors are created, propagated, and surfaced
+- **Async** — patterns in use (promises, callbacks, channels…)
+- **Code style** — formatting, structure, and style patterns, including what linters and formatters enforce
+- **Module boundaries** — import structure, what may depend on what
+- **Commit format** — inferred from git history when available
+
+Infer from naming across the codebase, import structure, existing error and async code, config files, and git history. Include everything — don't skip a convention because a tool already enforces it; external configs are not portable.
 
 ## Writing Rules (Implementation-Specific)
 

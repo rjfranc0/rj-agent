@@ -18,7 +18,7 @@ Additionally:
 - All references are valid and semantic — no bare links
 - No unverified `⚠️ Inferred` or `🔍 Bootstrap note` sections remain
 - File structure matches split decision rules from `structure.md`
-- `AGENTS.md` is present, accurate, and canonical
+- `AGENTS.md` is the only agent instruction file, lean and accurate
 
 ## Workflow
 
@@ -26,6 +26,7 @@ Additionally:
 
 Check `docs/` tree against `structure.md`:
 - Missing index files
+- Missing `implementation/conventions.md`
 - Files above soft cap (250–300 lines) — flag, note split candidacy
 - Files that should be split (both gates pass)
 - Misplaced files or domains
@@ -50,12 +51,7 @@ For each doc file, check against the cognitive model standard:
 
 ### Phase 4 — Agent File Audit
 
-Apply audit scope from `agent-files.md`:
-- Doc-reading rule present and correctly formed
-- Doc map matches actual `docs/` tree
-- No system knowledge that belongs in docs
-- Conventions reflect current codebase
-- Stub files contain only `@AGENTS.md`
+Apply the audit scope from `agent-files.md`.
 
 ### Phase 5 — Gap Report
 
@@ -81,10 +77,10 @@ Issues that degrade agent understanding.
 
 ### Inference Flags Outstanding
 - `functional/payments/settlement.md`: 2 Bootstrap notes unverified
+- `implementation/payments/provider.md`: 1 Inferred claim needs confirmation
 
 ### Agent File Issues
-- [any issues found in `AGENTS.md` or stub files]
-- `implementation/payments/provider.md`: 1 Inferred claim needs confirmation
+- [leftover vendor files, bloated `## Corpus`, stale commands…]
 
 ### Recommended Actions
 Prioritized fix list for Rewrite mode, highest severity first.

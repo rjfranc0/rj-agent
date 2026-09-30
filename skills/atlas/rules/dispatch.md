@@ -1,50 +1,56 @@
 # Dispatch
 
-How to pack context for a station and format its output comment.
+How to build a subagent's prompt and post what it returns.
 
-## Context packing
+## The prompt is the context pack
 
-You are the context packer. Pull together the **minimum sufficient** context for the current station — judged per task, not templated:
+Each subagent starts with an empty context plus its own preloaded skill. Your packet is everything else it knows. Pack by role:
 
-- **Functional intent** — the relevant slice of the issue's `## Description` (and `## Objective` if it materially helps).
-- **Task block** — the `Task N.N` entries for this step, verbatim from `## Technical`, including their `[example]` snippets and file paths.
-- **Codebase context** — prefer pointing at `corpus`-generated doc files covering the task's domain/files over re-deriving codebase context yourself. If corpus docs don't exist or don't cover this scope, say so plainly in the packet and let the dispatched specialist fall back to its normal direct-codebase reading. Missing corpus coverage is not a blocker.
-- **Prior findings** (fix dispatches only) — the specific `tessa`/`argus` finding(s) being addressed, plus your root-cause reasoning for why this specialist owns the fix (per the analytical routing model — the dispatch map is supporting evidence, never the routing rule itself).
+| Receives | Implementers (SLL, fixes) | `tessa` scoped (SLL) | `tessa` global (OTTL) | `argus` (WL) | `corpus` (final Update) |
+|---|---|---|---|---|---|
+| Mode + step reference | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Functional intent (relevant slice of `## Description`) | ✓ | ✓ | ✓ | ✓ | |
+| The unit block, verbatim | ✓ | ✓ | | | |
+| Contracts the unit produces or consumes, verbatim | ✓ | ✓ | | | |
+| All contracts | | | ✓ | ✓ | ✓ |
+| `### Decisions`, verbatim | ✓ | | | ✓ | ✓ |
+| `[Cn]` statements for the unit's contracts | | ✓ | | | |
+| Whole `### Automated tests` (or `[new test]` lines) | | | ✓ | | |
+| `### Observability` items the unit touches | ✓ | | | ✓ | |
+| Files touched (from the dispatch map) + full diff | | | | ✓ | ✓ |
+| Corpus doc pointers for the scope | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Prior findings + your root-cause reasoning | fixes only | re-checks only | re-checks only | re-checks only | |
 
-## Loading the station's hat
+Rules:
+- **Contracts are passed as fixed.** Never paraphrase or trim one.
+- **Codebase context** — point at `corpus` docs covering the scope. If none do, say so; the subagent reads the codebase directly. Missing coverage is not a blocker.
+- **`corpus` packet** — mode Update, scope the whole issue, write directly. That makes its run unattended by its own rules.
+- **Return contract** — end every packet with: "Return your full output as your final message."
+- Never include instructions about model, effort, or thinking.
 
-Load the target station's `SKILL.md` (and whatever rule files *it* specifies for the domain it detects) and run it exactly as it would run standalone, against the packed scope. While wearing its hat, its boundaries and workflow apply — not atlas's. Return to being atlas only once its output is ready to post.
+## Posting output
 
-## Output comment format
-
-Two header variants. Below the `---`, the body is always the station's own native output, untouched — atlas never reformats or summarizes it.
-
-**Plan+implement / status dispatches** (any station, any sequence step):
+The subagent's final message is its output. Post it as a new comment; below the `---`, the body is untouched.
 
 ```markdown
-# Atlas Dispatch — Step N/M (`<station>`)
+# Atlas Dispatch — Step N/M (`<subagent>`)
 
-**Scope:** [Tasks X.X, X.X / "OTTL global pass" / "WL argus pass" / "corpus refresh"]
-**Context provided:** [corpus doc paths and/or "no corpus docs for this scope — direct codebase", task IDs]
-**Mode:** plan+implement
+**Scope:** [Unit N — title / "visual review" / "OTTL global pass" / "WL argus pass" / "final docs Update"]
+**Context provided:** [contracts C1, C2 / corpus doc paths or "no corpus docs — direct codebase"]
+**Mode:** [implement / fix / review / test / docs]
 
 ---
 
-[station's own output]
+[subagent output]
 ```
 
-**Plan-only specialist outputs** (`vera`/`hugo`/`aurora`/`ferran`/`silas`, human-requested):
+Plan-only outputs use `# From Atlas State - Step N/M (\`<subagent>\`)` with **Mode:** plan.
 
-```markdown
-# From Atlas State - Task N/M (`<station>`)
+`N/M` is always the entry's position in the Workflow sequence.
 
-**Scope:** [Tasks X.X, X.X]
-**Context provided:** [...]
-**Mode:** plan
+## Reading the result
 
----
-
-[specialist's plan]
-```
-
-The step/task number (`N/M`) always refers to the entry's position in the `# Atlas State` Workflow sequence, so any comment can be traced back to exactly one sequence entry.
+- **Pass / done** → advance per `state.md`.
+- **Fail** (`tessa`, `argus`, or visual review) → findings to Notes, route per `state.md`.
+- **Contract blocker** → stop. Never route a fix.
+- **Other blocker** → stop condition. Post the output, record it in Notes, stop.

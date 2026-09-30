@@ -8,6 +8,7 @@ When to propose vs. write directly, and how to handle conflicts.
 |---|---|
 | Small | Propose changes in chat → incorporate feedback → write |
 | Large | Write directly to repo → user reviews in repo |
+| Unattended (`SKILL.md`) | Write directly, whatever the scope → list changed files in your output |
 
 **Small**: single file edit, or a handful of targeted changes to existing files
 **Large**: new files created, structural changes to `docs/` tree, or 3+ files touched
@@ -22,6 +23,7 @@ A conflict is when code and docs describe different behavior. Never silently res
 |---|---|
 | 1–3 conflicts | Batch question → wait for resolution → write |
 | 4+ conflicts | Full conflict report → pause → user resolves → write |
+| Unattended, any count | Leave conflicting doc claims untouched, write everything else, return the full conflict report in your output |
 
 ### Conflict Report Format
 
@@ -48,6 +50,6 @@ A conflict is when code and docs describe different behavior. Never silently res
 |---|---|
 | Bootstrap | Hard stop — always confirm before proceeding |
 | Rewrite | Hard stop — always confirm before proceeding |
-| Update | Soft stop — confirm, proceed on no objection |
-| Targeted | Soft stop — confirm, proceed on no objection |
-| Audit | Soft stop — confirm, proceed on no objection |
+| Update | Soft stop — confirm, proceed on no objection; skipped when unattended |
+| Targeted | Soft stop — confirm, proceed on no objection; skipped when unattended |
+| Audit | Soft stop — confirm, proceed on no objection; skipped when unattended |
