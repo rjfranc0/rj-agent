@@ -24,7 +24,7 @@ When receiving user-provided input, classify before extracting:
 
 | Type | Signal | Approach |
 |---|---|---|
-| Structured spec / issue | Clear sections: goal, scope, technical decisions | Extract intent, scope, decisions directly |
+| Structured spec / issue | Clear sections: goal, scope, technical decisions, contracts | Extract intent, scope, decisions, and contracts directly |
 | Loose prompt or description | Unstructured, partial, informal | Extract what's explicit, flag missing parts |
 | Code only | No prose context | Infer everything from implementation |
 | Existing docs + code | Both present | Diff and compare, surface conflicts |
@@ -40,6 +40,8 @@ When receiving user-provided input, classify before extracting:
 
 Batch all blockers — never interrupt per item. Surface once:
 > "Before I continue, I need clarity on [N items]: [list]. Can you answer these?"
+
+Unattended: don't wait. Write everything that doesn't depend on a blocker, and return the batched list as **Blockers** in your output.
 
 ## Discovery Scope by Mode
 

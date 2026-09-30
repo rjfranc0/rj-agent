@@ -51,11 +51,9 @@ Produce a **proposed domain map**:
 ### Phase 2 — Write
 
 Write the full tree following the confirmed domain map. Only create branches confirmed in Phase 1. Write in dependency order — branches that others reference should exist first:
-
-Write in dependency order — branches that others reference should exist first:
 1. `docs/index.md`
 2. `docs/functional/` — foundation, referenced by everything
-3. `docs/implementation/` — references functional
+3. `docs/implementation/` — references functional; always includes `conventions.md`
 4. `docs/design/` — references functional
 5. `docs/data/` — references functional and implementation
 6. `docs/infra/` — references implementation and data
@@ -68,9 +66,7 @@ Output is **large by definition** → write directly to repo (see `output.md`).
 
 ### Phase 3 — Agent Files
 
-Apply `agent-files.md` rules. Generate or update `AGENTS.md` and stub files.
-
-After writing, produce:
+Apply `agent-files.md` rules: generate `AGENTS.md` (plus nested files for monorepo packages), and migrate then delete any vendor-specific agent files.
 
 ### Phase 4 — Bootstrap Summary
 
@@ -81,6 +77,10 @@ After writing, produce:
 - Functional: X domains, Y files
 - Implementation: X domains, Y files
 - [other branches if present]
+
+### Agent files
+- `AGENTS.md`: [created / updated], nested: [list or none]
+- Migrated and deleted: [vendor files, or none]
 
 ### Confidence flags
 - Needs verification: [files with high inference load]

@@ -4,16 +4,16 @@ Rules for generating surface artifacts — README files and project description 
 
 ## README Generation
 
-### Completeness Gate
+### Sources
 
-**Full generation** — blocked unless:
-- At least one Rewrite pass completed
-- Zero breaking gaps remaining from last Audit
-- Inferred flags (`⚠️ Inferred`) are acceptable — missing contracts are not
+Build the README from the docs as they stand — no completeness gate. A README is needed early, and the doc lifecycle keeps raising its quality over time.
 
-If gate fails, state why and recommend completing the doc cycle first.
+Docs that aren't finished yet must not turn into confident README claims:
+- A claim resting on a `⚠️ Inferred` or `🔍 Bootstrap note` section → write it, marked `> ⚠️ To confirm`
+- A section the docs can't support yet (open breaking gap, missing contract) → keep the heading, state what's missing in one line
+- After writing, list every flagged claim and gap in your output
 
-**Rewrite/refactor** — no completeness gate. Existing README is the primary source, docs supplement and correct.
+**Rewrite/refactor** of an existing README: the existing README is the primary source; docs supplement and correct.
 
 ### README Types
 
@@ -66,9 +66,8 @@ README is part of the corpus audit. Checked for:
 - Accuracy against current docs
 - Stale instructions (commands, paths, versions)
 - Missing sections for its type
+- `⚠️ To confirm` claims whose source docs are now verified — remove the flag
 - Content that belongs in docs instead
-
----
 
 ## Description Snippets
 

@@ -22,28 +22,25 @@ A unit with a missing tag, or a tag not in this table, is a sequence-build block
 
 One SLL entry per unit, in unit order — unit order is execution order. Never merge or reorder units; `blueprint` already grouped the work.
 
-After each SLL entry, insert a `corpus refresh` entry.
-
 ## 3. OTTL and WL
 
-After all SLL + corpus entries, append exactly:
+After all SLL entries, append exactly:
 
 - One `OTTL` entry — `tessa` global pass, `cycle 0/2`.
 - One `WL` entry — `argus` full-diff pass, `cycle 0/2`.
 
 ## 4. Final corpus
 
-Always end with one final `corpus refresh`.
+Always end with exactly one `corpus` Update over the whole issue. Docs are not refreshed between SLLs — each specialist gets its contracts and reads the code.
 
 ## Canonical shape
 
 ```
 1. [ ] Unit 1 SLL — <subagent> — iteration 1/3 (<subagent>)
-2. [ ] corpus refresh
-   ... (repeat 1–2 per unit)
+   ... (one entry per unit)
 N.   [ ] OTTL — tessa global pass — cycle 0/2 (tessa)
 N+1. [ ] WL — argus pass — cycle 0/2 (argus)
-N+2. [ ] final corpus refresh
+N+2. [ ] corpus — final Update
 ```
 
 Always produce the full shape, even for a single-unit issue.

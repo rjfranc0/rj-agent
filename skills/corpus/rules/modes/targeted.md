@@ -15,7 +15,7 @@ From user input, determine:
 
 If docs exist: check for existing coverage first. Update in place rather than create a duplicate.
 
-If location in tree is ambiguous → confirm with user before writing.
+If location in tree is ambiguous → confirm with user before writing. Unattended → pick the most specific existing location and say where in your output.
 
 ## Workflow
 
@@ -28,4 +28,4 @@ If location in tree is ambiguous → confirm with user before writing.
 
 ## Output
 
-Small scope by default → propose in chat before writing. If the output creates a new file or section in the tree, apply the threshold from `output.md`.
+Small scope by default → propose in chat before writing. If the output creates a new file or section in the tree, apply the threshold from `output.md`. Unattended → write directly.

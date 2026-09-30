@@ -20,7 +20,7 @@ A doc tree built with this skill should allow any AI agent to:
 
 ## Step 1 — Detect Mode
 
-Infer the mode from context. Present it for confirmation before doing anything else.
+Infer the mode from context. Present it for confirmation before doing anything else — unless the run is unattended (below).
 
 | Mode | Signal |
 |---|---|
@@ -38,6 +38,15 @@ Confirmation line:
 **Hard stop** (always confirm, never proceed without explicit yes): Bootstrap, Rewrite
 **Soft stop** (confirm, proceed on no objection): Update, Targeted, Audit
 
+### Unattended runs
+
+A run is unattended when the request states the mode and scope and asks for direct writes, or when no one is there to answer. Then:
+- Skip mode confirmation and every soft stop
+- Write directly — never propose in chat
+- Never block on a question: write everything that doesn't depend on the answer, and return blockers and conflicts in your output (formats in `output.md`)
+
+Bootstrap and Rewrite are never unattended — their hard stops always need a human.
+
 ## Step 2 — Load Rules
 
 After mode is confirmed, load in order:
@@ -46,7 +55,7 @@ After mode is confirmed, load in order:
 3. Additional core files declared inside the mode file
 4. `rules/domains/<domain>.md` — for each target domain (functional, implementation, design, infra, data)
 5. `rules/core/surfaces.md` — if the output is a README or description snippet
-6. `rules/core/agent-files.md` — if the task involves `AGENTS.md` or other agent files
+6. `rules/core/agent-files.md` — if the task involves `AGENTS.md` or any other agent instruction file
 
 ## Step 3 — Execute
 

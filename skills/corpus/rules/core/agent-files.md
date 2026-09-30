@@ -1,99 +1,66 @@
 # Core: Agent Files
 
-Rules for managing `AGENTS.md` and agent-specific files. Applies during Bootstrap, Audit, and Rewrite.
+Rules for managing agent instruction files. Applies during Bootstrap, Audit, and Rewrite.
 
-## Source of Truth Model
+## One File: `AGENTS.md`
 
-One `AGENTS.md` at project root is the canonical agent instruction file. All agent-specific files (`CLAUDE.md`, `GEMINI.md`, `WARP.md`, etc.) are thin stubs that reference it:
+`AGENTS.md` is the only agent instruction file in a project. Agents that support it read it natively, root and nested.
 
-```
-@AGENTS.md
-```
+No vendor-specific files: no `CLAUDE.md`, `.claude/CLAUDE.md`, `CLAUDE.local.md`, `GEMINI.md`, `WARP.md`, or stubs pointing to `AGENTS.md`. A leftover `CLAUDE.md`, `.claude/CLAUDE.md`, or `CLAUDE.local.md` anywhere on the path makes Claude Code skip `AGENTS.md` entirely — removing them is part of the job, not cleanup.
 
-Corpus enforces this model. Corpus never touches content below `## Corpus` in any file — that section is reserved for human-authored instructions.
+Corpus owns only the `## Corpus` section of each `AGENTS.md`. Everything outside it is human-authored and never touched.
 
-## File Management on Bootstrap
+## File Management
 
-### Case 1 — No agent file exists
+### No agent file exists
 
-1. Generate `AGENTS.md` (see structure below)
-2. Scan for agent-specific config folders (`.claude/`, `.gemini/`, `.warp/`, etc.)
-3. For each found → create matching stub file (`CLAUDE.md`, `GEMINI.md`, etc.) with `@AGENTS.md` as only content
-4. Nothing found → do nothing beyond `AGENTS.md`
+Generate `AGENTS.md` (structure below).
 
-### Case 2 — One specific agent file exists (e.g. `CLAUDE.md`)
+### Vendor-specific files exist
 
-1. Generate `AGENTS.md` from its content
-2. Replace specific file content with `@AGENTS.md` stub
+1. Generate `AGENTS.md` if missing.
+2. Move each vendor file's human-authored content into `AGENTS.md`, outside `## Corpus`. Merge duplicates; when two files contradict each other, keep both versions and flag the conflict (`output.md`) — never pick one.
+3. Delete the vendor files.
 
-### Case 3 — Multiple specific agent files, no `AGENTS.md`
+Hard stop before step 3 unless the run is unattended: list the files to delete and what moved where.
 
-1. Generate `AGENTS.md` skeleton (do not merge — content stays in specific files)
-2. Prepend `@AGENTS.md` to each specific file without touching existing content
-3. Propose refactor to human: extract shared rules to `AGENTS.md`, keep agent-specific rules in place
-4. Execute refactor only if accepted
+### `AGENTS.md` already exists
 
-### Case 4 — `AGENTS.md` already exists with stub references
+Review and update the `## Corpus` section only.
 
-Setup is already canonical. Proceed directly to review and update.
+### Nested `AGENTS.md`
 
-### Explicit override
-
-If the human states a specific file is the only agent file used in this project, target that file only. Skip `AGENTS.md` generation entirely.
+For monorepos, generate one `AGENTS.md` per package or app root, holding only what differs from the root file — package-specific commands and doc pointers. Agents load a nested file only when working in that directory, so package context costs nothing elsewhere.
 
 ## `AGENTS.md` Structure
 
+Loaded into every agent session — every line is paid on every run. Keep it to what an agent needs before it opens a single doc:
+
 ```markdown
-# [Project Name] — Agent Instructions
+# [Project Name]
+
+[One or two sentences: what the project is and who it serves.]
 
 ## Corpus
 
+### Commands
+[Exact, copy-pasteable dev / test / typecheck / lint / build commands. Nothing else.]
+
 ### Doc-Reading Rules
-[Always present. Instructs agents to start with docs/index.md, follow refs to narrow scope, never load the full tree blindly, trust docs as source of truth.]
-
-### Doc Map
-[Lists all active docs/ branches, one-line description each, current confidence level.]
-
-### Architecture
-[Inferred architectural patterns — service boundaries, layer responsibilities, data flow.]
-
-### Naming Conventions
-[File, function, variable, domain naming patterns inferred from codebase.]
-
-### Error Handling
-[How errors are handled, propagated, and surfaced across the project.]
-
-### Async Conventions
-[Async patterns in use — promises, callbacks, channels, etc.]
-
-### Code Style
-[Formatting, structure, and style patterns inferred from codebase.]
-
-### Commit Format
-[Commit message conventions inferred from git history if available.]
+[Always present. Start with docs/index.md, follow refs to narrow scope, never load the full tree blindly. Docs are the source of truth. If docs and code disagree, don't pick a side silently — report the conflict.]
 ```
 
-## Convention Inference
-
-Run during Bootstrap map phase. Goal: a project worked from docs and agent file alone, on any machine, without any external skill or config.
-
-Infer from:
-- File and folder naming patterns
-- Function and variable naming across the codebase
-- Import structure and module boundaries
-- Error handling patterns in existing code
-- Async patterns in use
-- Git history for commit format
-- Config files for code style rules
-
-Include everything. Do not skip conventions assuming they are handled elsewhere — external configs are not portable.
+Everything else belongs in `docs/`:
+- Architecture → `docs/implementation/index.md`
+- Naming, error handling, async, code style, commit format → `docs/implementation/conventions.md` (see `rules/domains/implementation.md`)
+- Doc map and confidence levels → `docs/index.md`
 
 ## Audit Scope
 
-Check `AGENTS.md` and all stub files for:
-- Doc-reading rule present and correctly formed
-- Doc map matches actual `docs/` tree (no missing or stale branches)
-- Confidence level reflects current doc state
-- No system knowledge that belongs in `docs/`
-- Conventions reflect current codebase patterns
-- Stub files contain only `@AGENTS.md` and nothing else
+Check for:
+- No vendor-specific agent files anywhere in the repo
+- `AGENTS.md` present at root, plus nested files where the repo has packages
+- `## Corpus` contains only the project line, Commands, and Doc-Reading Rules
+- Commands are current and runnable
+- Doc-Reading Rules present and correctly formed
+- No system knowledge in `AGENTS.md` that belongs in `docs/`
