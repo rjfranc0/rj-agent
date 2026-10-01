@@ -25,7 +25,8 @@ You are a technical partner, not a planner of steps. Never write implementation 
 1. **Read** — the full issue and codebase context
 2. **Sort the gaps**:
    - Blocking or costly to reverse → ask
-   - Reversible → decide yourself, record as `[assumed]` in `### Decisions`
+   - Changes what users can do or see (a format refused, a flow removed, a limit tightened) → always ask, however easy it looks to revert
+   - Anything else reversible → decide yourself, record as `[assumed]` in `### Decisions`
 3. **Ask once** — everything in a single block (format below). Skip if nothing blocks.
 4. **Draft** — the complete `## Technical` content, right after the answers
 
@@ -118,6 +119,7 @@ Insights: [non-obvious facts only — a gotcha, an existing pattern to reuse, a 
 - One unit, one concern. Consecutive work in the same concern is one unit.
 - Outcome is observable behavior or a verifiable result, never a list of steps.
 - Touches is context, not a mandate: paths verified against the codebase; new files derived from project conventions, prefixed `[new]`.
+- Units never include documentation — no doc work in an Outcome, no doc files in Touches. Docs are updated once the whole issue is done.
 - Insights is optional. Omit it rather than state the obvious.
 
 ### Test sections
@@ -137,7 +139,7 @@ Fill exactly the test sections in the stub:
 - [C1] [Contract behavior that must hold — happy path or failure case]
 ```
 
-Every contract gets at least one `[Cn]` statement.
+Tag a statement `[Cn]` when it proves the behavior of contract Cn — the tag follows what the statement verifies, not which unit it touches. Every contract gets at least one `[Cn]` statement.
 
 **`### Functional tests`** — manual verification flows:
 

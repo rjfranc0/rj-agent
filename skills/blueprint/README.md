@@ -71,3 +71,6 @@ Blueprint this feature
 | D8 | Work units: one concern each, ordered, tagged with a station-agnostic concern tag | Phases + tasks | Units carry exactly what routing needs, with no ecosystem knowledge |
 | D9 | `frontend:*` tags split create / redesign / feature; no design system → `create` | One `frontend` tag | Design-heavy work and in-system work need different executors |
 | D10 | Automated tests become must-hold behavior statements; every contract covered by a `[Cn]` statement; manual sections unchanged | Test case names per module | Test structure is the tester's call; contracts must be proven, not just declared |
+| D11 | Units never include documentation | Docs as part of a unit's outcome | Docs are written once per issue, after all units — per-unit doc work duplicates it |
+| D12 | Anything changing what users can do or see is always asked, never `[assumed]` | Treat it as a reversible gap | Cheap to revert in code, not once users hit it |
+| D13 | `[Cn]` tags follow the contract a statement proves | Tag by unit or leave implicit | Makes contract coverage checkable at a glance |
