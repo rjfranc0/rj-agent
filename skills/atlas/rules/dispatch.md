@@ -17,7 +17,7 @@ Each subagent starts with an empty context plus its own preloaded skill. Your pa
 | `[Cn]` statements for the unit's contracts | | ✓ | | | |
 | Whole `### Automated tests` (or `[new test]` lines) | | | ✓ | | |
 | `### Observability` items the unit touches | ✓ | | | ✓ | |
-| Files touched (from the dispatch map) + full diff | | | | ✓ | ✓ |
+| Files touched (from the dispatch map) + diff range (`<base>...HEAD`) to run themselves | | | | ✓ | ✓ |
 | Corpus doc pointers for the scope | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Prior findings + your root-cause reasoning | fixes only | re-checks only | re-checks only | re-checks only | |
 
