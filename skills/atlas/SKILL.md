@@ -70,7 +70,7 @@ Repeat until a stop condition:
 1. **Current step** — the first `[ ]` in the Workflow sequence. Its sub-status says who's next (`rules/state.md`).
 2. **Drift check** — the step's unit must still exist in `## Technical` with the same concern tag, and the contracts it touches must be unchanged since sequence build. Mismatch → stop condition.
 3. **Pack context** per `rules/dispatch.md` — this packet *is* the subagent's prompt.
-4. **Dispatch** the subagent named by the sub-status. Wait for it to finish, including anything it started in the background.
+4. **Dispatch** the subagent named by the sub-status, mapped through Executor mode (`rules/dispatch.md`). Wait for it to finish, including anything it started in the background.
 5. **Post** its returned output as a new comment, header per `rules/dispatch.md`. Never reformat the body.
 6. **Update `# Atlas State`** in place: sub-status, tick, dispatch map, DoD, Notes.
 7. Next step.
@@ -93,6 +93,7 @@ Anything else is not a stop. Don't end the turn with a summary that announces th
 - **Step mode** (human-specified) — identical, but stop after each completed step.
 - **Plan only** (human-specified, implementation stations only) — dispatch the subagent with a plan-only instruction for the current unit, post as `# From Atlas State - Step N/M (...)`, stop. The next run implements from that plan.
 - **Status** — no dispatch. Read `# Atlas State` + issue and answer: progress, blockers, DoD satisfiability, ready to close.
+- **Full Claude** (human-specified, combinable with the others) — every station runs as its own Claude agent instead of its `-codex` relay. Applies to this invocation only; without it, the executor is `mix`.
 
 ## Caps
 
