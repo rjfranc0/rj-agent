@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# rj-codex — run one station on Codex. Packet on stdin, envelope on stdout.
+# Usage: rj-codex run <station> <<'RJ_PACKET' ... RJ_PACKET
+set -Eeuo pipefail
+
+MODEL="${RJ_CODEX_MODEL:-gpt-6.1-sol}"
+EFFORT="${RJ_CODEX_EFFORT:-high}"
+TIMEOUT="${RJ_CODEX_TIMEOUT:-45m}"
+SKILLS_DIR="${RJ_SKILLS_DIR:-$HOME/.agents/skills}"
+AGENTS_DIR="${RJ_AGENTS_DIR:-$HOME/.claude/agents}"   # where the Claude station agents live
+
+# Allowed paths per station (ERE on repo-relative paths). Empty = no guard.
+# Tripwire, not a lock: changes stay in place, the violation is reported as failed.
+guard_for() {
+  case "$1" in
+    tessa)  echo '^tests/|\.rs$' ;;   # .rs: in-file #[cfg(test)] exception
+    corpus) echo '^docs/|(^|/)AGENTS\.md$|(^|/)README\.md$' ;;
+    aurora|vera) echo '' ;;
+    *) return 1 ;;
+  esac
+}
+
+envelope() { # status reason
+  printf 'status=%s\nreason=%s\nstation=%s\njob=%s\nthread=%s\nchanged=%s\nresult=%s\n' \
+    "$1" "$2" "$station" "$job" "${thread:-none}" "${nchanged:-0}" "$job/result.md"
+  exit 0
+}
+
+for dep in codex git jq timeout; do
+  command -v "$dep" >/dev/null || { echo "missing dependency: $dep" >&2; exit 2; }
+done
+
+[[ "${1:-}" == run && -n "${2:-}" ]] || { echo "usage: rj-codex run <station>" >&2; exit 2; }
+station="$2"
+guard="$(guard_for "$station")" || { echo "unknown station: $station" >&2; exit 2; }
+
+# The Claude agent file is the single source of the role: reuse its body and its skill.
+agent_file="$AGENTS_DIR/$station.md"
+[[ -f "$agent_file" ]] || { echo "agent file not found: $agent_file" >&2; exit 2; }
+skill="$(sed -n 's/^skills:[[:space:]]*\[\([^],]*\).*/\1/p' "$agent_file" | tr -d ' ')"
+role="$(awk '/^---[[:space:]]*$/ && n<2 {n++; next} n>=2' "$agent_file")"
+[[ -n "$skill" && -f "$SKILLS_DIR/$skill/SKILL.md" ]] || { echo "skill not found for $station" >&2; exit 2; }
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+job="$(git rev-parse --absolute-git-dir)/rj-codex/$(date +%Y%m%d-%H%M%S)-$$-$station"
+mkdir -p "$job"
+thread=""; nchanged=0
+
+# Snapshot the whole working tree (tracked + untracked, minus ignored) as a tree
+# object via a throwaway index. No commit, no ref, working tree untouched.
+snapshot() { GIT_INDEX_FILE="$job/index" git add -A && GIT_INDEX_FILE="$job/index" git write-tree; }
+before="$(snapshot)"
+
+packet="$(cat)"
+[[ -n "${packet//[[:space:]]/}" ]] || envelope failed empty_packet
+
+{
+  printf '%s\n\n' "$role"
+  cat <<EOF
+Load and follow the skill at $SKILLS_DIR/$skill/SKILL.md, and the rule files it tells you to load.
+
+## Execution environment
+- Never run git commands that write (commit, stash, checkout, reset, add). Leave all changes uncommitted.
+- Dependencies are already installed and there is no network access. If something you need is missing, return a Blocker.
+
+## Task packet
+EOF
+  printf '%s\n' "$packet"
+} > "$job/mission.md"
+
+set +e
+timeout --kill-after=30s "$TIMEOUT" codex exec \
+  --model "$MODEL" \
+  -c model_reasoning_effort="\"$EFFORT\"" \
+  -c approval_policy='"never"' \
+  --sandbox workspace-write \
+  --json \
+  -o "$job/result.md" \
+  - < "$job/mission.md" > "$job/events.jsonl" 2> "$job/stderr.log"
+rc=$?
+set -e
+
+thread="$(jq -r 'select(.type=="thread.started") | .thread_id' "$job/events.jsonl" 2>/dev/null | head -n1 || true)"
+[[ $rc -eq 124 || $rc -eq 137 ]] && envelope cancelled timeout_$TIMEOUT
+[[ $rc -ne 0 ]] && envelope failed "codex_exit_$rc"
+[[ -s "$job/result.md" ]] || envelope failed no_result
+
+changed="$(git diff --name-only "$before" "$(snapshot)")"
+printf '%s\n' "$changed" > "$job/changed.txt"
+nchanged="$(grep -c . <<<"$changed" || true)"
+[[ $nchanged -eq 0 ]] && envelope done no_changes
+
+if [[ -n "$guard" ]]; then
+  outside="$(grep -Ev "$guard" <<<"$changed" || true)"
+  if [[ -n "$outside" ]]; then
+    printf '%s\n' "$outside" > "$job/scope_violation.txt"
+    envelope failed "scope_violation(see $job/scope_violation.txt)"
+  fi
+fi
+
+envelope done ok
