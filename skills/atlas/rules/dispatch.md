@@ -17,7 +17,7 @@ Each subagent starts with an empty context plus its own preloaded skill. Your pa
 | `[Cn]` statements for the unit's contracts | | ✓ | | | |
 | Whole `### Automated tests` (or `[new test]` lines) | | | ✓ | | |
 | `### Observability` items the unit touches | ✓ | | | ✓ | |
-| Files touched (from the dispatch map) + diff range (`<base>...HEAD`) to run themselves | | | | ✓ | ✓ |
+| Files touched (from the dispatch map) + the candidate: `git diff <base>` plus untracked files (nothing is committed), to run themselves | | | | ✓ | ✓ |
 | Corpus doc pointers for the scope | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Prior findings + your root-cause reasoning | fixes only | re-checks only | re-checks only | re-checks only | |
 
@@ -27,6 +27,28 @@ Rules:
 - **`corpus` packet** — mode Update, scope the whole issue, write directly. That makes its run unattended by its own rules.
 - **Return contract** — end every packet with: "Return your full output as your final message."
 - Never include instructions about model, effort, or thinking.
+
+## Executor routing
+
+Executor mode is `mix` unless this invocation asked for **Full Claude**.
+
+| Station | `mix` | `claude` |
+|---|---|---|
+| `aurora` | `aurora-codex` | `aurora` |
+| `vera` | `vera-codex` | `vera` |
+| `tessa` | `tessa-codex` | `tessa` |
+| `corpus` | `corpus-codex` | `corpus` |
+| any other | the station | the station |
+
+The packet is identical in both modes.
+
+## Executor envelope
+
+A `-codex` subagent returns an envelope (first line `status=`), not the station's output.
+
+- `status=done` → Read the file at `result=`. That file is the station's output: post it and read it as below. Add `**Executor:** codex · <changed> files changed` to the header.
+- `status=done` on a plan-only dispatch with `changed` above 0 → Blocker: the plan run modified files.
+- `status=failed` or `cancelled` → the station produced no output. Post the envelope under the normal header, put `reason` and `job` in Notes, stop with a Blocker. It doesn't count as an iteration or a cycle.
 
 ## Posting output
 
