@@ -13,8 +13,8 @@ AGENTS_DIR="${RJ_AGENTS_DIR:-$HOME/.claude/agents}"   # where the Claude station
 # Tripwire, not a lock: changes stay in place, the violation is reported as failed.
 guard_for() {
   case "$1" in
-    tessa)  echo '^tests/|\.rs$' ;;   # .rs: in-file #[cfg(test)] exception
-    corpus) echo '^docs/|(^|/)AGENTS\.md$|(^|/)README\.md$' ;;
+    tessa)  echo '(^|/)tests?/|\.(test|spec)\.[cm]?[jt]sx?$|\.rs$' ;;   # .rs: in-file #[cfg(test)] exception
+    corpus) echo '(^|/)docs/|(^|/)AGENTS\.md$|(^|/)README\.md$' ;;
     aurora|vera) echo '' ;;
     *) return 1 ;;
   esac
