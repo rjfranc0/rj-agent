@@ -1,38 +1,60 @@
 #!/usr/bin/env bash
 # rj-codex — run one station on Codex. Packet on stdin, envelope on stdout.
-# Usage: rj-codex run <station> <<'RJ_PACKET' ... RJ_PACKET
+#   rj-codex run <station> <<'RJ_PACKET' ... RJ_PACKET
+#   rj-codex ctx <ISSUE-ID> <<'RJ_CTX' ... RJ_CTX     # writes the issue context file, prints its path
 set -Eeuo pipefail
 
-MODEL="${RJ_CODEX_MODEL:-gpt-6.1-sol}"
-EFFORT="${RJ_CODEX_EFFORT:-high}"
-TIMEOUT="${RJ_CODEX_TIMEOUT:-45m}"
+TIMEOUT="${RJ_CODEX_TIMEOUT:-90m}"
 SKILLS_DIR="${RJ_SKILLS_DIR:-$HOME/.agents/skills}"
 AGENTS_DIR="${RJ_AGENTS_DIR:-$HOME/.claude/agents}"   # where the Claude station agents live
+# Extra writable dirs for workspace-write stations (pnpm store, cache, state). Missing dirs are skipped.
+ADD_DIRS="${RJ_CODEX_ADD_DIRS:-$HOME/.local/share/pnpm $HOME/.cache/pnpm $HOME/.local/state/pnpm}"
 
-# Allowed paths per station (ERE on repo-relative paths). Empty = no guard.
-# Tripwire, not a lock: changes stay in place, the violation is reported as failed.
-guard_for() {
+SOL="gpt-6.1-sol"
+ASTRA="gpt-astra-6"
+
+# Per station: model | effort | sandbox | guard (ERE of allowed repo-relative paths; empty = no guard).
+# Guard is a tripwire, not a lock: changes stay in place, the run reports failed.
+config_for() {
   case "$1" in
-    tessa)  echo '(^|/)tests?/|\.(test|spec)\.[cm]?[jt]sx?$|\.rs$' ;;   # .rs: in-file #[cfg(test)] exception
-    corpus) echo '(^|/)docs/|(^|/)AGENTS\.md$|(^|/)README\.md$' ;;
-    aurora|vera) echo '' ;;
+    hugo)   echo "$SOL|xhigh|danger-full-access|" ;;                   # needs Postgres, local servers
+    ferran) echo "$SOL|xhigh|workspace-write|" ;;
+    vera)   echo "$SOL|high|workspace-write|" ;;
+    aurora) echo "$SOL|high|workspace-write|" ;;
+    silas)  echo "$SOL|high|workspace-write|" ;;
+    tessa)  echo "$SOL|high|danger-full-access|(^|/)tests?/|\.(test|spec)\.[cm]?[jt]sx?\$|\.rs\$" ;;  # .rs: in-file #[cfg(test)]
+    argus)  echo "$ASTRA|high|read-only|^\$" ;;                          # matches nothing: any change is a violation
     *) return 1 ;;
   esac
-}
-
-envelope() { # status reason
-  printf 'status=%s\nreason=%s\nstation=%s\njob=%s\nthread=%s\nchanged=%s\nresult=%s\n' \
-    "$1" "$2" "$station" "$job" "${thread:-none}" "${nchanged:-0}" "$job/result.md"
-  exit 0
 }
 
 for dep in codex git jq timeout; do
   command -v "$dep" >/dev/null || { echo "missing dependency: $dep" >&2; exit 2; }
 done
 
-[[ "${1:-}" == run && -n "${2:-}" ]] || { echo "usage: rj-codex run <station>" >&2; exit 2; }
-station="$2"
-guard="$(guard_for "$station")" || { echo "unknown station: $station" >&2; exit 2; }
+cmd="${1:-}"; arg="${2:-}"
+[[ ( "$cmd" == run || "$cmd" == ctx ) && -n "$arg" ]] \
+  || { echo "usage: rj-codex run <station> | rj-codex ctx <ISSUE-ID>" >&2; exit 2; }
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+base="$(git rev-parse --absolute-git-dir)/rj-codex"
+
+# ---- ctx: store the issue context once per run, packets point to it ----
+if [[ "$cmd" == ctx ]]; then
+  [[ "$arg" =~ ^[A-Za-z0-9_-]+$ ]] || { echo "bad issue id: $arg" >&2; exit 2; }
+  mkdir -p "$base/ctx"
+  out="$base/ctx/$arg.md"
+  cat > "$out"
+  [[ -s "$out" ]] || { echo "empty context" >&2; exit 2; }
+  echo "$out"
+  exit 0
+fi
+
+# ---- run ----
+station="$arg"
+cfg="$(config_for "$station")" || { echo "unknown station: $station" >&2; exit 2; }
+IFS='|' read -r model effort sandbox guard <<<"$cfg"
 
 # The Claude agent file is the single source of the role: reuse its body and its skill.
 agent_file="$AGENTS_DIR/$station.md"
@@ -41,14 +63,17 @@ skill="$(sed -n 's/^skills:[[:space:]]*\[\([^],]*\).*/\1/p' "$agent_file" | tr -
 role="$(awk '/^---[[:space:]]*$/ && n<2 {n++; next} n>=2' "$agent_file")"
 [[ -n "$skill" && -f "$SKILLS_DIR/$skill/SKILL.md" ]] || { echo "skill not found for $station" >&2; exit 2; }
 
-root="$(git rev-parse --show-toplevel)"
-cd "$root"
-job="$(git rev-parse --absolute-git-dir)/rj-codex/$(date +%Y%m%d-%H%M%S)-$$-$station"
+job="$base/$(date +%Y%m%d-%H%M%S)-$$-$station"
 mkdir -p "$job"
 thread=""; nchanged=0
 
-# Snapshot the whole working tree (tracked + untracked, minus ignored) as a tree
-# object via a throwaway index. No commit, no ref, working tree untouched.
+envelope() { # status reason
+  printf 'status=%s\nreason=%s\nstation=%s\njob=%s\nthread=%s\nchanged=%s\nresult=%s\n' \
+    "$1" "$2" "$station" "$job" "${thread:-none}" "${nchanged:-0}" "$job/result.md"
+  exit 0
+}
+
+# Snapshot the working tree (tracked + untracked, minus ignored) through a throwaway index.
 snapshot() { GIT_INDEX_FILE="$job/index" git add -A && GIT_INDEX_FILE="$job/index" git write-tree; }
 before="$(snapshot)"
 
@@ -57,24 +82,31 @@ packet="$(cat)"
 
 {
   printf '%s\n\n' "$role"
-  cat <<EOF
+  cat <<MISSION
 Load and follow the skill at $SKILLS_DIR/$skill/SKILL.md, and the rule files it tells you to load.
 
 ## Execution environment
 - Never run git commands that write (commit, stash, checkout, reset, add). Leave all changes uncommitted.
-- Dependencies are already installed and there is no network access. If something you need is missing, return a Blocker.
+- Dependencies are installed. Don't install, add, or upgrade packages. If something you need is missing, return a Blocker.
+- Work only in this repository. Never use another checkout of it.
 
 ## Task packet
-EOF
+MISSION
   printf '%s\n' "$packet"
 } > "$job/mission.md"
 
+add_dir_flags=()
+if [[ "$sandbox" == workspace-write ]]; then
+  for d in $ADD_DIRS; do [[ -d "$d" ]] && add_dir_flags+=(--add-dir "$d"); done
+fi
+
 set +e
 timeout --kill-after=30s "$TIMEOUT" codex exec \
-  --model "$MODEL" \
-  -c model_reasoning_effort="\"$EFFORT\"" \
+  --model "$model" \
+  -c model_reasoning_effort="\"$effort\"" \
   -c approval_policy='"never"' \
-  --sandbox workspace-write \
+  --sandbox "$sandbox" \
+  ${add_dir_flags[@]+"${add_dir_flags[@]}"} \
   --json \
   -o "$job/result.md" \
   - < "$job/mission.md" > "$job/events.jsonl" 2> "$job/stderr.log"
@@ -82,7 +114,7 @@ rc=$?
 set -e
 
 thread="$(jq -r 'select(.type=="thread.started") | .thread_id' "$job/events.jsonl" 2>/dev/null | head -n1 || true)"
-[[ $rc -eq 124 || $rc -eq 137 ]] && envelope cancelled timeout_$TIMEOUT
+[[ $rc -eq 124 || $rc -eq 137 ]] && envelope cancelled "timeout_$TIMEOUT"
 [[ $rc -ne 0 ]] && envelope failed "codex_exit_$rc"
 [[ -s "$job/result.md" ]] || envelope failed no_result
 
