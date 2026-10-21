@@ -1,91 +1,53 @@
 # atlas
 
-Fullstack lead and dispatcher. *Titan holding the map* — carries the whole pipeline without building any of it himself.
-
-A single-station-per-invocation orchestrator: reads a `blueprint`-filled issue and its `# Atlas State` Linear comment, decides what runs next, wears that station's hat for one invocation, writes the result back to Linear, stops. Stateless across invocations by design — any model, any session, picks up exactly where the last one left off.
+Dispatcher for the rj-agent pipeline. Takes a `blueprint`-filled issue and runs it end to end through the stations, without implementing anything itself.
 
 ## Structure
 
 ```
 atlas/
-├── SKILL.md              # identity, entry guard, execution loop, modes, boundaries
+├── SKILL.md           # sequence, entry, run loop, fix cycles, stops, boundaries
 └── rules/
-    ├── sequencing.md     # task→specialist mapping, SLL/OTTL/WL/silas sequence derivation
-    ├── dispatch.md        # context packing + output comment formats
-    └── state.md           # Atlas State template, sub-status conventions, DoD sync
+    ├── dispatch.md    # how to call a station, what to send, how to read the result
+    └── state.md       # the # Atlas State comment
 ```
 
-## Loop structure: SLL, OTTL, WL
+Agent file: `agents/atlas.md` (Opus / high, no edit tools). Start it with `claude --agent atlas`.
 
-- **SLL** — Specialist Level Loop: `specialist (vera/hugo/aurora/ferran) ↔ tessa → corpus`, looping between specialist and tessa until tessa validates.
-- **OTTL** — Orchestrator-To-Test Loop: all SLLs feed into one global `tessa` pass; on failure, atlas re-dispatches and the cycle repeats (cap 2).
-
-```
-atlas (dispatch to specialists) → SLL → tessa
-    ↑←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←↓
-```
-
-- **WL** — Workflow Loop: the entire OTTL goes back-and-forth with `argus`, each cycle requiring its own validation (cap 2).
-
-### From the workflow perspective
+## Flow
 
 ```
-atlas ─▶ specialist (vera/hugo/aurora/ferran) ─▶ tessa ─▶ corpus ─▶ tessa ─▶ argus ─▶ silas ─▶ corpus
- ▲ ▲         ▲                                     │                  │        │
- │ │         │     Specialist level feedback       │                  │        │
- │ │         └─────────────────────────────────────┘                  │        │
- │ │                                                                  │        │
- │ │         Global Tests and Feedbacks (Integration/E2E)             │        │
- │ └──────────────────────────────────────────────────────────────────┘        │
- │                                                                             │
- │                     Re-dispatch reviews comments                            │
- └─────────────────────────────────────────────────────────────────────────────┘
+Unit 1 … Unit U ──▶ tessa global ──▶ argus ──▶ corpus
+(one dispatch each)   ⟲ fix ×2        ⟲ fix ×2
 ```
 
-### From the dev perspective — one invocation per node
-
-```
-atlas(dispatch/plan) ─▶ atlas[specialist] ─▶ atlas[tessa] ─▶ atlas[corpus] ─▶ atlas[tessa] ─▶ atlas[argus] ─▶ atlas[silas] ─▶ atlas[corpus]
- ▲  ▲                   ▲                         │                           │               │
- │  │                   │Specialist level feedback│                           │               │
- │  │                   └─────────────────────────┘                           │               │
- │  │                                                                         │               │
- │  │         Global Tests and Feedbacks (Integration/E2E)                    │               │
- │  └─────────────────────────────────────────────────────────────────────────┘               │
- │                                                                                            │
- │                     Re-dispatch reviews comments                                           │
- └────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
-Every `atlas[...]` node = one invocation = one Linear update. Nothing auto-chains between them.
-
-## Scope
-
-| Does | Doesn't |
+| Station | Runs on |
 |---|---|
-| Derives the dispatch sequence from a filled `## Technical` | Plans the implementation itself — that's `blueprint`'s job |
-| Loads `vera`/`hugo`/`aurora`/`ferran`/`tessa`/`argus`/`corpus`/`silas` as needed, one per invocation | Runs multiple stations or autonomous multi-step chains |
-| Tracks state + DoD in its own `# Atlas State` comment | Edits the issue body — human-owned, alongside `brief`/`blueprint` |
-| Packs minimal context (corpus pointers, task blocks, intent) | Re-derives full codebase context when corpus already covers it |
-| Routes fixes analytically (root-cause specialist) | Routes mechanically by "which file did this touch" |
-| Answers status/progress/DoD questions on request | Closes the issue or decides it's done — human's call |
+| `vera`, `hugo`, `aurora`, `ferran`, `silas`, `tessa`, `argus` | Codex, through `rj-codex` |
+| `aurora-design`, `corpus` | Claude subagents |
+
+## Before a run
+
+The environment is yours: create the worktree (`wt`), install dependencies, start Postgres, build what the stations need. A station that finds something missing stops the run with a Blocker.
+
+## State
+
+One Linear comment, `# Atlas State`: a status line, `## Notes` (deviations from the blueprint only) and `## Findings` (tessa/argus findings and how each ended). It's the only thing atlas writes to Linear. Station outputs stay in `.git/rj-codex/<job>/`.
 
 ## Decision log
 
-| # | Decision | Alternatives rejected | Why |
-|---|---|---|---|
-| D1 | State lives in a Linear comment (`# Atlas State`), not a local file | `.atlas/<issue-id>.md` scratch file | Matches the existing tessa/argus PR-comment convention; one place the human already looks |
-| D2 | Dispatch unit = contiguous specialist run (SLL), not atomic `Task N.N` | QA after every single task | Per-task QA is too fine-grained and too many pause points; per-slice tessa keeps fix attribution local without going coarse |
-| D3 | `tessa` runs per-SLL (scoped to what's testable now) *and* once globally (OTTL, integration/e2e) | Single end-of-feature pass only | Local pass keeps fix-loop attribution immediate; global pass catches what no single slice could test |
-| D4 | `argus` runs once, late, full-diff (WL) — not inside SLL | Per-SLL argus pass | Cross-specialist findings (e.g. access control spanning `vera`+`hugo`) need full context; doubling pause points per run isn't worth it |
-| D5 | OTTL and WL each cap fix-loops at 2 cycles, then surface to the human | Uncapped retries | Infinite auto-loops do more harm than a clean stop with findings |
-| D6 | Re-dispatch routing is analytical (root-cause judgment); dispatch map is supporting evidence only | Mechanical "file X was touched by Y → route to Y" | Atlas's first job is "fullstack lead" — judgment, not file-ownership lookup |
-| D7 | One invocation = one station, fully stateless across invocations | Autonomous multi-station runs with internal "hard pause points" | This isn't an autonomous agent — the human is the runtime, by design |
-| D8 | Specialist "plan only" is per-specialist, human-triggered, written as `# From Atlas State - Task N/M (...)` | Folding it into atlas's own sequence-build plan | Two different kinds of "plan" — atlas's dispatch sequence vs. a specialist's implementation plan for one task |
-| D9 | Atlas ticks DoD items in its own state comment; never edits the issue body | Atlas updates the issue's DoD checkboxes directly | Issue body stays human-edited, alongside `brief`/`blueprint`; atlas's comment is the sync target |
-| D10 | Drift detection is lazy — checked only when about to execute the current step's task | Proactive diff/hash check every invocation | Cheap, and only matters at the moment it'd actually block execution |
-| D11 | File structure: `SKILL.md` + three focused rule files (sequencing / dispatch / state) | Single monolithic `SKILL.md` | Each file answers one question atlas asks every invocation; easier to navigate than one long file |
-
-## Designed via
-
-`facet` deep / ai-skill session, from scratch — no inspiration skills imported (orchestrator skills generally assume autonomous subagent dispatch, which conflicts with the human-as-runtime model here).
+| # | Decision | Why |
+|---|---|---|
+| D1 | State in one Linear comment, edited in place | One place you already look |
+| D2 | The sequence is derived from the issue every invocation, never stored | Status `step N/M` plus the blueprint is enough to resume |
+| D3 | State reports by exception: deviations and findings only | The blueprint already says what should be done |
+| D4 | No per-unit test check; specialists run their tests, tessa runs once globally | One loop instead of N; red units are caught and routed by tessa |
+| D5 | argus once, late, on the full candidate; re-checks only see the fixes' changed files | Cross-station findings need full context; re-reading everything was ~750k tokens |
+| D6 | Fix cycles capped at 2, then stop with findings | A clean stop beats an infinite loop |
+| D7 | Fix routing is root-cause judgment, not file ownership | Atlas's job is routing |
+| D8 | Fix packets carry findings, never solutions | A prescribed fix sent hugo the wrong way (SEC-001); the station checks the code itself |
+| D9 | Issue context written once to a file (`rj-codex ctx`), packets point to it | Decisions and contracts were pasted ~35 times per run |
+| D10 | Codex called directly from atlas, no relay | Relays re-typed every packet and could truncate it |
+| D11 | aurora-design self-reviews in its build run | Cold-start reviewers were ~40% of the last run's tokens |
+| D12 | Nothing posted to Linear per dispatch | Every report crossed atlas's context twice |
+| D13 | Environment prep is manual | `wt` already handles worktrees and env files |

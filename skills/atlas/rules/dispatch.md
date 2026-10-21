@@ -1,78 +1,60 @@
 # Dispatch
 
-How to build a subagent's prompt and post what it returns.
+How to call a station, what to send, and how to read what comes back.
 
-## The prompt is the context pack
+## Calling
 
-Each subagent starts with an empty context plus its own preloaded skill. Your packet is everything else it knows. Pack by role:
+| Station | Call |
+|---|---|
+| `vera`, `hugo`, `aurora`, `ferran`, `silas`, `tessa`, `argus` | Bash, `timeout` parameter 5700000: `rj-codex run <station> <<'RJ_PACKET'` … `RJ_PACKET` |
+| `aurora-design`, `corpus` | Agent tool, the station as subagent type, the packet as prompt |
 
-| Receives | Implementers (SLL, fixes) | `tessa` scoped (SLL) | `tessa` global (OTTL) | `argus` (WL) | `corpus` (final Update) |
+One dispatch at a time. Wait for it to finish.
+
+## The packet
+
+Each station starts empty. The issue context lives in the file `rj-codex ctx` printed; point to it, never paste it.
+
+| Receives | Unit | Fix | `tessa` | `argus` | `corpus` |
 |---|---|---|---|---|---|
-| Mode + step reference | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Functional intent (relevant slice of `## Description`) | ✓ | ✓ | ✓ | ✓ | |
-| The unit block, verbatim | ✓ | ✓ | | | |
-| Contracts the unit produces or consumes, verbatim | ✓ | ✓ | | | |
-| All contracts | | | ✓ | ✓ | ✓ |
-| `### Decisions`, verbatim | ✓ | | | ✓ | ✓ |
-| `[Cn]` statements for the unit's contracts | | ✓ | | | |
-| Whole `### Automated tests` (or `[new test]` lines) | | | ✓ | | |
-| `### Observability` items the unit touches | ✓ | | | ✓ | |
-| Files touched (from the dispatch map) + the candidate: `git diff <base>` plus untracked files (nothing is committed), to run themselves | | | | ✓ | ✓ |
-| Corpus doc pointers for the scope | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Prior findings + your root-cause reasoning | fixes only | re-checks only | re-checks only | re-checks only | |
+| Mode + step `N/M` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Issue file path | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Which unit, and which contracts it produces or consumes | ✓ | | | | |
+| Corpus doc pointers for the scope, or "none — read the codebase" | ✓ | ✓ | ✓ | ✓ | ✓ |
+| The findings to fix, with your root-cause reasoning | | ✓ | | | |
+| Review scope (below) | | | | ✓ | |
 
-Rules:
-- **Contracts are passed as fixed.** Never paraphrase or trim one.
-- **Codebase context** — point at `corpus` docs covering the scope. If none do, say so; the subagent reads the codebase directly. Missing coverage is not a blocker.
-- **`corpus` packet** — mode Update, scope the whole issue, write directly. That makes its run unattended by its own rules.
-- **Return contract** — end every packet with: "Return your full output as your final message."
-- Never include instructions about model, effort, or thinking.
+Standing lines, by station:
 
-## Executor routing
+- **Units and fixes:** "Before returning, run the existing tests covering what you changed. Report what ran and the result."
+- **Fixes:** the findings and why this station owns them. Never prescribe the fix — the station decides how, and checks the code itself. Name any risk you see ("this path shares the rate limiter") without solving it.
+- **`aurora-design`:** "Before returning, render what you built and check it against the design system. Fix what's off."
+- **`tessa`:** run the issue's `### Automated tests` and `[Cn]` checks, across everything built.
+- **`argus`:** "Write no files. Return every report in your final message." Intent context is the issue file.
+- **`corpus`:** mode Update, scope the whole issue, write directly.
+- **Every packet ends with:** "End your output with a `Deviations:` line — anything you did beyond or differently from the issue, or `none`. Return your full output as your final message."
 
-Executor mode is `mix` unless this invocation asked for **Full Claude**.
+Never include instructions about model, effort, or thinking.
 
-| Station | `mix` | `claude` |
-|---|---|---|
-| `aurora` | `aurora-codex` | `aurora` |
-| `vera` | `vera-codex` | `vera` |
-| `tessa` | `tessa-codex` | `tessa` |
-| `corpus` | `corpus-codex` | `corpus` |
-| any other | the station | the station |
+### argus review scope
 
-The packet is identical in both modes.
-
-## Executor envelope
-
-A `-codex` subagent returns an envelope (first line `status=`), not the station's output.
-
-- `status=done` → Read the file at `result=`. That file is the station's output: post it and read it as below. Add `**Executor:** codex · <changed> files changed` to the header.
-- `status=done` on a plan-only dispatch with `changed` above 0 → Blocker: the plan run modified files.
-- `status=failed` or `cancelled` → the station produced no output. Post the envelope under the normal header, put `reason` and `job` in Notes, stop with a Blocker. It doesn't count as an iteration or a cycle.
-
-## Posting output
-
-The subagent's final message is its output. Post it as a new comment; below the `---`, the body is untouched.
-
-```markdown
-# Atlas Dispatch — Step N/M (`<subagent>`)
-
-**Scope:** [Unit N — title / "visual review" / "OTTL global pass" / "WL argus pass" / "final docs Update"]
-**Context provided:** [contracts C1, C2 / corpus doc paths or "no corpus docs — direct codebase"]
-**Mode:** [implement / fix / review / test / docs]
-
----
-
-[subagent output]
-```
-
-Plan-only outputs use `# From Atlas State - Step N/M (\`<subagent>\`)` with **Mode:** plan.
-
-`N/M` is always the entry's position in the Workflow sequence.
+- **Cycle 0:** the full candidate, `git diff <base>` plus untracked files.
+- **Cycle 1+:** only the files the fixes changed, the union of their `changed.txt`, plus the findings to verify. On a resumed session, where those paths are lost, use the full candidate.
 
 ## Reading the result
 
-- **Pass / done** → advance per `state.md`.
-- **Fail** (`tessa`, `argus`, or visual review) → findings to Notes, route per `state.md`.
+**Codex stations** return an envelope (first line `status=`):
+
+- `status=done` → read the file at `result=`. That's the output.
+- `status=failed` or `cancelled` → Blocker. Put `reason` and `job` in the stop reply. It doesn't count as a cycle.
+
+**Claude stations** return their output directly.
+
+Then:
+
+- **Unit done** → next step. Red tests reported → Notes, keep going; tessa's global pass handles them.
+- **Pass / Fail** (tessa, argus) → fix cycles per `SKILL.md`.
 - **Contract blocker** → stop. Never route a fix.
-- **Other blocker** → stop condition. Post the output, record it in Notes, stop.
+- **Other blocker** → stop.
+
+Nothing is posted to Linear except the state.
